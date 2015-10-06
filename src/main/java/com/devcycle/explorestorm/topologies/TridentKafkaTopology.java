@@ -37,9 +37,6 @@ public class TridentKafkaTopology extends BaseExploreTopology {
     public static final String KAFKA_TOPIC = "kafka.topic";
     public static final String TRIDENT_KAFKA_SPOUT = "tridentKafkaSpout";
     public static final String TRIDENT_KAFKA_MESSAGE = "tridentKafkaMessage";
-    public static final String LOCALCLUSTERHOST = "localhost";
-    public static final long LOCALCLUSTERPORT = 2181L;
-    public static final int RUNTIME_IN_SECONDS = 6000;
     public static final String KAFKA_PUBLISH_TOPIC = "kafka.publish.topic";
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "explore_topology.properties";
     public static final String REMOTE = "remote";
@@ -72,23 +69,10 @@ public class TridentKafkaTopology extends BaseExploreTopology {
         }
         TridentKafkaTopology tridentKafkaTopology
                 = new TridentKafkaTopology(configFileLocation);
-        tridentKafkaTopology.buildAndSubmit(runLocally);
+        tridentKafkaTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
 
-    /*
-    Build and submit a TridentTopology that consumes messages from a Kafka topic, logs them and writes them to another Kafka topic.
-     */
-    protected void buildAndSubmit(boolean runLocally) throws InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
-        // create a Trident Topology
-        TridentTopology topology = buildTopology();
-        Config conf = buildConfig();
 
-        if (runLocally) {
-            runLocally(topology.build(), TOPOLOGY_NAME, conf);
-        } else {
-            runRemotely(topology.build(), TOPOLOGY_NAME, conf);
-        }
-    }
 
     /**
      * Build configuration for this Topology.
@@ -106,22 +90,9 @@ public class TridentKafkaTopology extends BaseExploreTopology {
         return conf;
     }
 
-    /*
-    Run trident topology remotely
-     */
-    protected void runRemotely(StormTopology topology, String topologyName, Config conf) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
-        StormRunner.runTopologyRemotely(topology, topologyName, conf);
-    }
 
-    /*
-    Run trident topology locally
-     */
-    protected void runLocally(StormTopology topology, String topologyName, Config conf) throws InterruptedException {
-        LocalCluster cluster = new LocalCluster(LOCALCLUSTERHOST, LOCALCLUSTERPORT);
-        StormRunner.runTopologyLocally(topology, topologyName, conf, RUNTIME_IN_SECONDS);
-    }
 
-    private TridentTopology buildTopology() {
+    protected StormTopology buildTopology() {
         TridentTopology topology = new TridentTopology();
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout();
         ExploreTransformMessage messageTransform = new ExploreTransformMessage();
@@ -129,7 +100,7 @@ public class TridentKafkaTopology extends BaseExploreTopology {
                 .each(kafkaSpout.getOutputFields(), new ExploreLogFilter())
                 .each(kafkaSpout.getOutputFields(), messageTransform, ExploreTransformMessage.getEmittedFields());
         buildKafkaSink(tridentStream);
-        return topology;
+        return topology.build();
     }
 
     private void buildKafkaSink(Stream stream) {

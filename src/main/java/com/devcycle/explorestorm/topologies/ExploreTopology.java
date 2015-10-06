@@ -2,6 +2,7 @@ package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
+import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.topology.TopologyBuilder;
 import com.devcycle.explorestorm.bolt.LogExploreEventsBolt;
@@ -11,6 +12,7 @@ import storm.kafka.BrokerHosts;
 import storm.kafka.KafkaSpout;
 import storm.kafka.SpoutConfig;
 import storm.kafka.ZkHosts;
+import storm.trident.TridentTopology;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,30 +65,6 @@ public class ExploreTopology extends BaseExploreTopology {
         builder.setBolt(LOG_EXPLORE_BOLT_ID, logBolt).globalGrouping(KAFKA_SPOUT_ID);
     }
 
-    public void runLocally(Config config) throws InterruptedException {
-        StormRunner.runTopologyLocally(builder.createTopology(), topologyName, config, runtimeInSeconds);
-    }
-
-    public void runRemotely(Config config) throws Exception {
-        StormRunner.runTopologyRemotely(builder.createTopology(), topologyName, config);
-    }
-
-    private void buildAndSubmit(boolean runLocally) throws Exception
-    {
-        configureKafkaSpout(builder);
-        configureLogExploreEventBolt(builder);
-
-
-        Config conf = new Config();
-        conf.setDebug(true);
-
-        if(runLocally) {
-            runLocally(conf);
-        } else {
-            runRemotely(conf);
-        }
-    }
-
     public static void main(String[] args) throws Exception
     {
         String configFileLocation = "explore_topology.properties";
@@ -97,6 +75,20 @@ public class ExploreTopology extends BaseExploreTopology {
         }
         ExploreTopology exploreTopology
                 = new ExploreTopology(configFileLocation, topologyName);
-        exploreTopology.buildAndSubmit(runLocally);
+        exploreTopology.buildAndSubmit(topologyName, runLocally);
+    }
+
+    @Override
+    protected Config buildConfig() {
+        Config conf = new Config();
+        conf.setDebug(true);
+        return conf;
+    }
+
+    @Override
+    protected StormTopology buildTopology() {
+        configureKafkaSpout(builder);
+        configureLogExploreEventBolt(builder);
+        return builder.createTopology();
     }
 }
