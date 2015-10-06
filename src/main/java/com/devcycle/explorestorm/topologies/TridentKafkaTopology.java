@@ -78,9 +78,24 @@ public class TridentKafkaTopology extends BaseExploreTopology {
     /*
     Build and submit a TridentTopology that consumes messages from a Kafka topic, logs them and writes them to another Kafka topic.
      */
-    private void buildAndSubmit(boolean runLocally) throws InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
+    protected void buildAndSubmit(boolean runLocally) throws InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
         // create a Trident Topology
         TridentTopology topology = buildTopology();
+        Config conf = buildConfig();
+
+        if (runLocally) {
+            runLocally(topology.build(), TOPOLOGY_NAME, conf);
+        } else {
+            runRemotely(topology.build(), TOPOLOGY_NAME, conf);
+        }
+    }
+
+    /**
+     * Build configuration for this Topology.
+     *
+     * @return config for the topology
+     */
+    protected Config buildConfig() {
         Config conf = new Config();
         //set producer properties.
         Properties props = new Properties();
@@ -88,27 +103,22 @@ public class TridentKafkaTopology extends BaseExploreTopology {
         props.put(REQUEST_REQUIRED_ACKS, topologyConfig.getProperty(REQUEST_REQUIRED_ACKS));
         props.put(SERIALIZER_CLASS, KAFKA_SERIALIZER_STRING_ENCODER);
         conf.put(TridentKafkaState.KAFKA_BROKER_PROPERTIES, props);
-
-        if (runLocally) {
-            runLocally(topology.build(), conf);
-        } else {
-            runRemotely(topology.build(), conf);
-        }
+        return conf;
     }
 
     /*
     Run trident topology remotely
      */
-    private void runRemotely(StormTopology topology, Config conf) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
-        StormRunner.runTopologyRemotely(topology, TOPOLOGY_NAME, conf);
+    protected void runRemotely(StormTopology topology, String topologyName, Config conf) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
+        StormRunner.runTopologyRemotely(topology, topologyName, conf);
     }
 
     /*
     Run trident topology locally
      */
-    private void runLocally(StormTopology topology, Config conf) throws InterruptedException {
+    protected void runLocally(StormTopology topology, String topologyName, Config conf) throws InterruptedException {
         LocalCluster cluster = new LocalCluster(LOCALCLUSTERHOST, LOCALCLUSTERPORT);
-        StormRunner.runTopologyLocally(topology, TOPOLOGY_NAME, conf, RUNTIME_IN_SECONDS);
+        StormRunner.runTopologyLocally(topology, topologyName, conf, RUNTIME_IN_SECONDS);
     }
 
     private TridentTopology buildTopology() {
