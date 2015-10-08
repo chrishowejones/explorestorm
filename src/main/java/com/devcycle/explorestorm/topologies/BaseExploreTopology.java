@@ -27,7 +27,23 @@ public abstract class BaseExploreTopology {
 
     protected Properties topologyConfig;
 
+    /**
+     * Create base class for topologies.
+     *
+     * @param configFileLocation
+     * @throws IOException
+     */
     public BaseExploreTopology(String configFileLocation) throws IOException {
+        loadTopologyConfig(configFileLocation);
+    }
+
+    /**
+     * Load the topology config properties.
+     *
+     * @param configFileLocation
+     * @throws IOException
+     */
+    protected void loadTopologyConfig(String configFileLocation) throws IOException {
         topologyConfig = new Properties();
         topologyConfig.load(ClassLoader.getSystemResourceAsStream(configFileLocation));
     }

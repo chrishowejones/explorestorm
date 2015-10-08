@@ -1,7 +1,6 @@
 package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
-import backtype.storm.LocalCluster;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.AuthorizationException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -9,11 +8,8 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
-import com.devcycle.explorestorm.function.ExploreLogFunction;
 import com.devcycle.explorestorm.function.ExploreTransformMessage;
 import com.devcycle.explorestorm.scheme.ExploreScheme;
-import com.devcycle.explorestorm.util.StormRunner;
-import org.apache.storm.zookeeper.KeeperException;
 import storm.kafka.BrokerHosts;
 import storm.kafka.ZkHosts;
 import storm.kafka.trident.*;
@@ -24,8 +20,6 @@ import storm.trident.TridentTopology;
 
 import java.io.IOException;
 import java.util.Properties;
-
-import static com.devcycle.explorestorm.scheme.ExploreScheme.FIELD_IP_ADDRESS;
 
 /**
  * Created by chris howe-jones on 30/09/15.

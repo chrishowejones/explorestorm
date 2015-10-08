@@ -1,23 +1,21 @@
 package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
-import backtype.storm.StormSubmitter;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.topology.TopologyBuilder;
 import com.devcycle.explorestorm.bolt.LogExploreEventsBolt;
 import com.devcycle.explorestorm.scheme.ExploreScheme;
-import com.devcycle.explorestorm.util.StormRunner;
 import storm.kafka.BrokerHosts;
 import storm.kafka.KafkaSpout;
 import storm.kafka.SpoutConfig;
 import storm.kafka.ZkHosts;
-import storm.trident.TridentTopology;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
+ * Simple Topology to consume messages from a Kafka topic and log to a log file.
+ *
  * Created by chrishowe-jones on 17/09/15.
  */
 public class ExploreTopology extends BaseExploreTopology {
