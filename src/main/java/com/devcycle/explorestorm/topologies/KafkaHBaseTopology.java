@@ -12,12 +12,14 @@ import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
 import com.devcycle.explorestorm.scheme.ExploreScheme;
 import org.apache.hadoop.hbase.client.Durability;
+import org.slf4j.LoggerFactory;
 import org.apache.storm.hbase.bolt.mapper.HBaseValueMapper;
 import org.apache.storm.hbase.trident.mapper.SimpleTridentHBaseMapper;
 import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
 import org.apache.storm.hbase.trident.state.HBaseState;
 import org.apache.storm.hbase.trident.state.HBaseStateFactory;
 import org.apache.storm.hbase.trident.state.HBaseUpdater;
+import org.slf4j.Logger;
 import storm.kafka.BrokerHosts;
 import storm.kafka.ZkHosts;
 import storm.kafka.trident.OpaqueTridentKafkaSpout;
@@ -35,20 +37,22 @@ import java.io.IOException;
  */
 public class KafkaHBaseTopology extends BaseExploreTopology {
 
+    private Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
+
     private static final String TOPOLOGY_NAME = "kafkaHBaseTopology";
     public static final String KAFKA_ZOOKEEPER_HOST_PORT = "kafka.zookeeper.host.port";
     public static final String KAFKA_TOPIC = "kafka.topic";
-    public static final String TRIDENT_KAFKA_SPOUT = "tridentKafkaSpout";
-    public static final String TRIDENT_KAFKA_MESSAGE = "tridentKafkaMessage";
+    public static final String TRIDENT_KAFKA_SPOUT = "hbaseKafkaSpout";
+    public static final String TRIDENT_KAFKA_MESSAGE = "hbaseKafkaMessage";
 
-    public static final String KAFKA_PUBLISH_TOPIC = "kafka.publish.topic";
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "explore_topology.properties";
     public static final String REMOTE = "remote";
     public static final String HBASE_ROOT = "hbase.root";
     private final String hbaseRoot;
 
 
-    public KafkaHBaseTopology(String configFileLocation) throws IOException {
+    public KafkaHBaseTopology(String configFileLocation
+    ) throws IOException {
         super(configFileLocation);
         this.hbaseRoot = topologyConfig.getProperty(HBASE_ROOT);
     }
@@ -67,11 +71,20 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
     public static void main(String[] args) throws IOException, InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
         String configFileLocation = EXPLORE_TOPOLOGY_PROPERTIES;
         boolean runLocally = true;
-        if (args.length >= 1 && args[0].equalsIgnoreCase(REMOTE)) {
+        String hbaseRoot;
+        KafkaHBaseTopology tridentKafkaTopology;
+        if (args.length >= 1 && args[0].trim().equalsIgnoreCase(REMOTE)) {
             runLocally = false;
         }
-        KafkaHBaseTopology tridentKafkaTopology
-                = new KafkaHBaseTopology(configFileLocation);
+        if (args.length >= 2 && args[1].length() > 0) {
+            hbaseRoot = args[1].trim();
+            tridentKafkaTopology
+                    = new KafkaHBaseTopology(configFileLocation,hbaseRoot);
+        } else {
+            tridentKafkaTopology
+                    = new KafkaHBaseTopology(configFileLocation);
+        }
+
         tridentKafkaTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
 
@@ -79,6 +92,8 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
     protected Config buildConfig() {
         //set config.
         Config conf = new Config();
+        conf.setMaxSpoutPending(2);
+        LOG.info("Build config");
         return conf;
     }
 
@@ -93,29 +108,32 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
 
         HBaseValueMapper rowToStormValueMapper = new ExploreMessageValueMapper();
 
-
         HBaseState.Options options = new HBaseState.Options()
                 .withConfigKey(hbaseRoot)
                 .withDurability(Durability.SYNC_WAL)
                 .withMapper(tridentHBaseMapper)
                 .withRowToStormValueMapper(rowToStormValueMapper)
                 .withTableName("test_message");
-
+        LOG.info("Created options");
 
 
         TridentTopology topology = new TridentTopology();
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(exploreScheme);
         StateFactory hbaseStateFactory = new HBaseStateFactory(options);
+        LOG.info("Created HBaseStateFactory");
         Stream tridentStream = topology.newStream(TRIDENT_KAFKA_MESSAGE, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ExploreLogFilter());
+                .each(kafkaSpout.getOutputFields(), new ExploreLogFilter(this.getClass().getName()));
+        LOG.info("Created stream and initialised with LogFilter.");
         tridentStream.partitionPersist(
                 hbaseStateFactory, kafkaSpout.getOutputFields(), new HBaseUpdater(), new Fields()
         );
-
+        LOG.info("Set up partition persist for HBase updater.");
+        LOG.info("Calling build on topology");
         return topology.build();
     }
 
     private OpaqueTridentKafkaSpout buildKafkaSpout(Scheme scheme) {
+        LOG.info("Build Kafka Spout");
         BrokerHosts zk = new ZkHosts(topologyConfig.getProperty(KAFKA_ZOOKEEPER_HOST_PORT));
         TridentKafkaConfig spoutConf = new TridentKafkaConfig(zk, topologyConfig.getProperty(KAFKA_TOPIC), TRIDENT_KAFKA_SPOUT);
         spoutConf.scheme = new SchemeAsMultiScheme(scheme);

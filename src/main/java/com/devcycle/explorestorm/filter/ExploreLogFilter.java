@@ -17,9 +17,14 @@ public class ExploreLogFilter implements Filter {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(ExploreLogFilter.class);
+    private final String sourceTopologyName;
+
+    public ExploreLogFilter(String sourceTopologyName) {
+        this.sourceTopologyName = sourceTopologyName;
+    }
 
     public boolean isKeep(TridentTuple tuple) {
-        LOG.info("******MY MESSAGE ****** " + ExploreScheme.prettyPrintTuple(tuple));
+        LOG.info("******" + sourceTopologyName + "****** " + ExploreScheme.prettyPrintTuple(tuple));
         return true;
     }
 

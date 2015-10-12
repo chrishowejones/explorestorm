@@ -53,6 +53,7 @@ public abstract class BaseExploreTopology {
      */
     protected void buildAndSubmit(String topologyName, boolean runLocally) throws InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
         // create a Trident Topology
+        LOG.debug("build and submit");
         StormTopology topology = buildTopology();
         Config conf = buildConfig();
 
@@ -72,6 +73,7 @@ public abstract class BaseExploreTopology {
     Run trident topology remotely
      */
     protected void runRemotely(StormTopology topology, String topologyName, Config conf) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
+        LOG.debug("run remotely");
         StormRunner.runTopologyRemotely(topology, topologyName, conf);
     }
 
@@ -79,6 +81,7 @@ public abstract class BaseExploreTopology {
     Run trident topology locally
      */
     protected void runLocally(StormTopology topology, String topologyName, Config conf) throws InterruptedException {
+        LOG.debug("run remotely");
         LocalCluster cluster = new LocalCluster(LOCALCLUSTERHOST, LOCALCLUSTERPORT);
         StormRunner.runTopologyLocally(topology, topologyName, conf, RUNTIME_IN_SECONDS);
     }

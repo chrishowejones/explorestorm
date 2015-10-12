@@ -91,7 +91,7 @@ public class TridentKafkaTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout();
         ExploreTransformMessage messageTransform = new ExploreTransformMessage();
         Stream tridentStream = topology.newStream(TRIDENT_KAFKA_MESSAGE, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ExploreLogFilter())
+                .each(kafkaSpout.getOutputFields(), new ExploreLogFilter(this.getClass().getName()))
                 .each(kafkaSpout.getOutputFields(), messageTransform, ExploreTransformMessage.getEmittedFields());
         buildKafkaSink(tridentStream);
         return topology.build();
