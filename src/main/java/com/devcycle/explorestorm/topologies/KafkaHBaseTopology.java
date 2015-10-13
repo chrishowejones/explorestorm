@@ -81,7 +81,7 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         if (args.length >= 2 && args[1].length() > 0) {
             hbaseRoot = args[1].trim();
             tridentKafkaTopology
-                    = new KafkaHBaseTopology(configFileLocation,hbaseRoot);
+                    = new KafkaHBaseTopology(configFileLocation, hbaseRoot);
         } else {
             tridentKafkaTopology
                     = new KafkaHBaseTopology(configFileLocation);
@@ -104,7 +104,9 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
     private HashMap<String, Object> getHBaseConfig() {
         HashMap<String, Object> hbaseConfig = new HashMap<String, Object>();
         hbaseConfig.put("hbase.rootdir", hbaseRoot);
-        hbaseConfig.put("hbase.zookeeper.quorum", "hostgroupmaster1-3-lloyds-20150923072909.node.dc1.consul");
+        hbaseConfig.put("hbase.zookeeper.quorum", "hostgroupmaster1-3-lloyds-20150923072909.node.dc1.consul," +
+                "hostgroupmaster3-4-lloyds-20150923072909.node.dc1.consul," +
+                "hostgroupmaster2-2-lloyds-20150923072909.node.dc1.consul");
         return hbaseConfig;
     }
 
