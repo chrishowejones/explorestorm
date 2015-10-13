@@ -29,6 +29,7 @@ import storm.trident.TridentTopology;
 import storm.trident.state.StateFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Topology to consume data from Kafka spout and persist in HBase.
@@ -37,6 +38,7 @@ import java.io.IOException;
  */
 public class KafkaHBaseTopology extends BaseExploreTopology {
 
+    private static final String HBASE_CONFIG = "hbase.config";
     private Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
 
     private static final String TOPOLOGY_NAME = "kafkaHBaseTopology";
@@ -93,8 +95,17 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         //set config.
         Config conf = new Config();
         conf.setMaxSpoutPending(2);
+        HashMap<String, Object> hbaseConfig = getHBaseConfig();
+        conf.put(HBASE_CONFIG, hbaseConfig);
         LOG.info("Build config");
         return conf;
+    }
+
+    private HashMap<String, Object> getHBaseConfig() {
+        HashMap<String, Object> hbaseConfig = new HashMap<String, Object>();
+        hbaseConfig.put("hbase.rootdir", hbaseRoot);
+        hbaseConfig.put("hbase.zookeeper.quorum", "hostgroupmaster1-3-lloyds-20150923072909.node.dc1.consul");
+        return hbaseConfig;
     }
 
     @Override
@@ -109,7 +120,7 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         HBaseValueMapper rowToStormValueMapper = new ExploreMessageValueMapper();
 
         HBaseState.Options options = new HBaseState.Options()
-                .withConfigKey(hbaseRoot)
+                .withConfigKey(HBASE_CONFIG)
                 .withDurability(Durability.SYNC_WAL)
                 .withMapper(tridentHBaseMapper)
                 .withRowToStormValueMapper(rowToStormValueMapper)

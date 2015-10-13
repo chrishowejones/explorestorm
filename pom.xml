@@ -10,16 +10,34 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <storm.version>0.10.0-beta1</storm.version>
-        <storm.kafka.version>0.10.0-beta1</storm.kafka.version>
-        <hadoop.version>2.7.1</hadoop.version>
-        <hbase.version>1.1.1</hbase.version>
+        <storm.version>0.10.0.2.3.0.0-2557</storm.version>
+        <storm.kafka.version>0.10.0.2.3.0.0-2557</storm.kafka.version>
+        <hadoop.version>2.7.1.2.3.0.0-2557</hadoop.version>
+        <hbase.version>1.1.1.2.3.0.0-2557</hbase.version>
         <log4j.version>1.2.17</log4j.version>
-        <storm.hdfs.version>0.10.0-beta1</storm.hdfs.version>
-        <storm.hbase.version>0.10.0-beta1</storm.hbase.version>
-        <hive.version>1.2.1</hive.version>
-
+        <storm.hdfs.version>0.10.0.2.3.0.0-2557</storm.hdfs.version>
+        <storm.hbase.version>0.10.0.2.3.0.0-2557</storm.hbase.version>
+        <hive.version>1.2.1.2.3.0.0-2557</hive.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <id>HDPReleases</id>
+            <name>HDP Releases</name>
+            <url>http://repo.hortonworks.com/content/repositories/releases/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -28,7 +46,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>1.4</version>
                 <configuration>
-                    <createDependencyReducedPom></createDependencyReducedPom>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
@@ -53,7 +71,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.devcycle.explorestorm.topologies.ExploreTopology</mainClass>
+                                    <mainClass></mainClass>
                                 </transformer>
                             </transformers>
 
@@ -62,6 +80,17 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
     <dependencies>
@@ -179,16 +208,8 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.10</artifactId>
-            <version>0.8.2.0</version>
+            <version>0.8.2.2.3.0.0-2557</version>
             <exclusions>
-                <exclusion>
-                    <groupId>org.apache.zookeeper</groupId>
-                    <artifactId>zookeeper</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -209,12 +230,7 @@
             </exclusions>
         </dependency>
 
-        <!-- HBase Dependcies -->
-        <dependency>
-            <groupId>org.apache.storm</groupId>
-            <artifactId>storm-hbase</artifactId>
-            <version>0.10.0-beta1</version>
-        </dependency>
+        <!-- HBase Dependencies -->
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
