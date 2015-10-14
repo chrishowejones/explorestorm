@@ -11,8 +11,8 @@ import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
 import com.devcycle.explorestorm.scheme.ExploreScheme;
+import com.devcycle.explorestorm.util.HBaseConfigBuilder;
 import org.apache.hadoop.hbase.client.Durability;
-import org.slf4j.LoggerFactory;
 import org.apache.storm.hbase.bolt.mapper.HBaseValueMapper;
 import org.apache.storm.hbase.trident.mapper.SimpleTridentHBaseMapper;
 import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
@@ -20,6 +20,7 @@ import org.apache.storm.hbase.trident.state.HBaseState;
 import org.apache.storm.hbase.trident.state.HBaseStateFactory;
 import org.apache.storm.hbase.trident.state.HBaseUpdater;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import storm.kafka.BrokerHosts;
 import storm.kafka.ZkHosts;
 import storm.kafka.trident.OpaqueTridentKafkaSpout;
@@ -38,19 +39,22 @@ import java.util.HashMap;
  */
 public class KafkaHBaseTopology extends BaseExploreTopology {
 
-    private static final String HBASE_CONFIG = "hbase.config";
-    private Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
-
-    private static final String TOPOLOGY_NAME = "kafkaHBaseTopology";
+    public static final String COLUMN_FAMILY = "message data";
+    public static final String ROW_KEY_FIELD = "ipAddress";
+    public static final String TABLE_NAME = "test_message";
     public static final String KAFKA_ZOOKEEPER_HOST_PORT = "kafka.zookeeper.host.port";
     public static final String KAFKA_TOPIC = "kafka.topic";
     public static final String TRIDENT_KAFKA_SPOUT = "hbaseKafkaSpout";
     public static final String TRIDENT_KAFKA_MESSAGE = "hbaseKafkaMessage";
-
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "explore_topology.properties";
     public static final String REMOTE = "remote";
-    public static final String HBASE_ROOT = "hbase.root";
+    public static final String HBASE_ROOT = "hbase.rootdir";
+    private static final String HBASE_CONFIG = "hbase.config";
+    private static final String TOPOLOGY_NAME = "kafkaHBaseTopology";
     private final String hbaseRoot;
+    private Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
+    private com.devcycle.explorestorm.util.HBaseConfigBuilder HBaseConfigBuilder;
+    private HBaseConfigBuilder hbaseConfigBuilder;
 
 
     public KafkaHBaseTopology(String configFileLocation
@@ -101,24 +105,14 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         return conf;
     }
 
-    private HashMap<String, Object> getHBaseConfig() {
-        HashMap<String, Object> hbaseConfig = new HashMap<String, Object>();
-        hbaseConfig.put("hbase.rootdir", hbaseRoot);
-        hbaseConfig.put("hbase.zookeeper.quorum", "hostgroupmaster1-3-lloyds-20150923072909.node.dc1.consul," +
-                "hostgroupmaster3-4-lloyds-20150923072909.node.dc1.consul," +
-                "hostgroupmaster2-2-lloyds-20150923072909.node.dc1.consul");
-        hbaseConfig.put("zookeeper.znode.parent", "/hbase-unsecure");
-        return hbaseConfig;
-    }
-
     @Override
     protected StormTopology buildTopology() {
         Scheme exploreScheme = new ExploreScheme();
         Fields fields = exploreScheme.getOutputFields();
         TridentHBaseMapper tridentHBaseMapper = new SimpleTridentHBaseMapper()
-                .withColumnFamily("message data")
+                .withColumnFamily(COLUMN_FAMILY)
                 .withColumnFields(fields)
-                .withRowKeyField("ipAddress");
+                .withRowKeyField(ROW_KEY_FIELD);
 
         HBaseValueMapper rowToStormValueMapper = new ExploreMessageValueMapper();
 
@@ -127,7 +121,7 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
                 .withDurability(Durability.SYNC_WAL)
                 .withMapper(tridentHBaseMapper)
                 .withRowToStormValueMapper(rowToStormValueMapper)
-                .withTableName("test_message");
+                .withTableName(TABLE_NAME);
         LOG.info("Created options");
 
 
@@ -154,4 +148,17 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         return new OpaqueTridentKafkaSpout(spoutConf);
     }
 
+    HashMap<String, Object> getHBaseConfig() {
+        return getHBaseConfigBuilder().getHBaseConfig(topologyConfig);
+    }
+
+    HBaseConfigBuilder getHBaseConfigBuilder() {
+        if (hbaseConfigBuilder == null)
+            this.hbaseConfigBuilder = new HBaseConfigBuilder();
+        return hbaseConfigBuilder;
+    }
+
+    void setHBaseConfigBuilder(HBaseConfigBuilder hbaseConfigBuilder) {
+        this.hbaseConfigBuilder = hbaseConfigBuilder;
+    }
 }
