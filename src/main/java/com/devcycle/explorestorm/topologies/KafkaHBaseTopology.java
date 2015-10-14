@@ -107,6 +107,7 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
         hbaseConfig.put("hbase.zookeeper.quorum", "hostgroupmaster1-3-lloyds-20150923072909.node.dc1.consul," +
                 "hostgroupmaster3-4-lloyds-20150923072909.node.dc1.consul," +
                 "hostgroupmaster2-2-lloyds-20150923072909.node.dc1.consul");
+        hbaseConfig.put("zookeeper.znode.parent", "/hbase-unsecure");
         return hbaseConfig;
     }
 

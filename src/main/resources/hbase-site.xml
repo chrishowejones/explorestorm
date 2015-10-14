@@ -195,11 +195,13 @@
       <name>hbase.superuser</name>
       <value>hbase</value>
     </property>
-    
+
+<!--
     <property>
       <name>hbase.tmp.dir</name>
       <value>/hadoopfs/fs1/hbase</value>
     </property>
+    -->
     
     <property>
       <name>hbase.zookeeper.property.clientPort</name>
