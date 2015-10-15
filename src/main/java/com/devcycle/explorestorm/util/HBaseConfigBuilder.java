@@ -24,4 +24,6 @@ public class HBaseConfigBuilder {
         hbaseConfig.put(ZOOKEEPER_ZNODE_PARENT, topologyConfig.getProperty(ZOOKEEPER_ZNODE_PARENT));
         return hbaseConfig;
     }
+
+
 }
