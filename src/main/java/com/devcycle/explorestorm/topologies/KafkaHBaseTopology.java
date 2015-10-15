@@ -51,8 +51,9 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
     public static final String HBASE_ROOT = "hbase.rootdir";
     private static final String HBASE_CONFIG = "hbase.config";
     private static final String TOPOLOGY_NAME = "kafkaHBaseTopology";
-    private final String hbaseRoot;
-    private Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaHBaseTopology.class);
     private com.devcycle.explorestorm.util.HBaseConfigBuilder HBaseConfigBuilder;
     private HBaseConfigBuilder hbaseConfigBuilder;
 
@@ -60,12 +61,11 @@ public class KafkaHBaseTopology extends BaseExploreTopology {
     public KafkaHBaseTopology(String configFileLocation
     ) throws IOException {
         super(configFileLocation);
-        this.hbaseRoot = topologyConfig.getProperty(HBASE_ROOT);
     }
 
     public KafkaHBaseTopology(String configFileLocation, String hbaseRoot) throws IOException {
         super(configFileLocation);
-        this.hbaseRoot = hbaseRoot;
+        topologyConfig.setProperty(HBASE_ROOT, hbaseRoot);
     }
 
     /**
