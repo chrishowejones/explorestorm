@@ -17,11 +17,9 @@ import java.util.List;
 public class LookupScheme implements Scheme {
 
     private static final Logger LOG = LoggerFactory.getLogger(LookupScheme.class);
-    private static final String FIELD_RETURN_COLUMNS = "returnColumns";
-    private static final String FIELD_ROW_KEY = "rowKey";
-    private static final String FIELD_HBASE_TABLE = "hbaseTable";
-    private static final Fields fields = new Fields(
-            FIELD_HBASE_TABLE,
+    public static final String FIELD_RETURN_COLUMNS = "returnColumns";
+    public static final String FIELD_ROW_KEY = "rowKey";
+    public static final Fields fields = new Fields(
             FIELD_ROW_KEY,
             FIELD_RETURN_COLUMNS
     );
@@ -33,10 +31,9 @@ public class LookupScheme implements Scheme {
             String lookupEvent = new String(bytes, "UTF-8");
             String [] pieces = lookupEvent.split("\\|");
 
-            String hbaseTableName = cleanup(pieces[0]);
-            String rowKey = cleanup(pieces[1]);
-            String returnColumns = cleanup(pieces[2]);
-            return new Values(hbaseTableName, rowKey, returnColumns);
+            String rowKey = cleanup(pieces[0]);
+            //String returnColumns = cleanup(pieces[1]);
+            return new Values(rowKey);
         } catch (UnsupportedEncodingException ex) {
             LOG.error("UTF-8 not supported", ex);
         }

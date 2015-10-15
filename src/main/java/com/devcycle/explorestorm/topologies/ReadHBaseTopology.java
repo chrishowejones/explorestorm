@@ -133,8 +133,8 @@ public class ReadHBaseTopology extends BaseExploreTopology {
         TridentState state = topology.newStaticState(factory);
 
         Stream stream = topology.newStream(LOOKUP_STREAM, kafkaSpout);
-        stream = stream.stateQuery(state, new Fields(ROW_KEY_FIELD), new HBaseQuery(), new Fields("columnName","columnValue"));
-        stream.each(new Fields(ROW_KEY_FIELD,"columnValue"), new PrintFunction(), new Fields());
+        stream = stream.stateQuery(state, new Fields(LookupScheme.FIELD_ROW_KEY), new HBaseQuery(), new Fields("columnName","columnValue"));
+        stream.each(new Fields(LookupScheme.FIELD_ROW_KEY,"columnValue"), new PrintFunction(), new Fields());
         return topology.build();
     }
 
