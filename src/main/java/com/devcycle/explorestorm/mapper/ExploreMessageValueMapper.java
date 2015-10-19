@@ -40,7 +40,8 @@ public class ExploreMessageValueMapper implements HBaseValueMapper {
         List<Values> values = new ArrayList<Values>();
         Cell[] cells = result.rawCells();
         for (Cell cell : cells) {
-            Values value = new Values(Bytes.toString(CellUtil.cloneQualifier(cell)), Bytes.toLong(CellUtil.cloneValue(cell)));
+            Values value = new Values(Bytes.toString(CellUtil.cloneQualifier(cell)), Bytes.toString(CellUtil.cloneValue(cell)));
+            values.add(value);
         }
         return values;
     }

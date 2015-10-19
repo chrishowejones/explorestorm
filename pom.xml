@@ -20,11 +20,11 @@
         <hive.version>1.2.1.2.3.0.0-2557</hive.version>
     </properties>
 
+
     <repositories>
         <repository>
             <releases>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
@@ -34,7 +34,7 @@
             </snapshots>
             <id>HDPReleases</id>
             <name>HDP Releases</name>
-            <url>http://repo.hortonworks.com/content/repositories/releases/</url>
+            <url>http://nexus-private.hortonworks.com/nexus/content/groups/public/</url>
             <layout>default</layout>
         </repository>
     </repositories>
@@ -187,11 +187,15 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
-            <version>0.6</version>
+            <version>0.5-1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-sslengine</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

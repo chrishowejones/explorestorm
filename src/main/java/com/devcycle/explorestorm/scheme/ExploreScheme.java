@@ -22,7 +22,7 @@ public class ExploreScheme implements Scheme {
     public static final String FIELD_MESSAGE = "message";
     public static final String FIELD_EVENT_TIME = "eventTime";
     public static final String FIELD_IP_ADDRESS = "ipAddress";
-    private Fields fields = new Fields(
+    public static Fields fields = new Fields(
             FIELD_EVENT_TIME,
             FIELD_MESSAGE,
             FIELD_IP_ADDRESS);
