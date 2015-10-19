@@ -108,16 +108,16 @@ public class ReadHBaseTopology extends BaseExploreTopology {
     @Override
     protected StormTopology buildTopology() {
         Scheme lookupScheme = new LookupScheme();
-        Fields fields = lookupScheme.getOutputFields();
+        Fields fields = new Fields(
+                ExploreScheme.FIELD_EVENT_TIME,
+                ExploreScheme.FIELD_MESSAGE
+        );
         TridentHBaseMapper tridentHBaseMapper = new SimpleTridentHBaseMapper()
                 .withColumnFamily(COLUMN_FAMILY)
                 .withColumnFields(fields)
                 .withRowKeyField(ROW_KEY_FIELD);
 
         HBaseValueMapper rowToStormValueMapper = new ExploreMessageValueMapper();
-
-        HBaseProjectionCriteria projectionCriteria = new HBaseProjectionCriteria();
-        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData("cf", "count"));
 
         HBaseState.Options options = new HBaseState.Options()
                 .withConfigKey(HBASE_CONFIG)
@@ -134,7 +134,7 @@ public class ReadHBaseTopology extends BaseExploreTopology {
 
         Stream stream = topology.newStream(LOOKUP_STREAM, kafkaSpout);
         stream = stream.stateQuery(state, new Fields(LookupScheme.FIELD_ROW_KEY), new HBaseQuery(), new Fields("columnName","columnValue"));
-        stream.each(new Fields(LookupScheme.FIELD_ROW_KEY,"columnValue"), new PrintFunction(), new Fields());
+        stream.each(new Fields(LookupScheme.FIELD_ROW_KEY,"columnName", "columnValue"), new PrintFunction(), new Fields());
         return topology.build();
     }
 

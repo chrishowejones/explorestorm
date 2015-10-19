@@ -18,10 +18,10 @@ public class LookupScheme implements Scheme {
 
     private static final Logger LOG = LoggerFactory.getLogger(LookupScheme.class);
     public static final String FIELD_RETURN_COLUMNS = "returnColumns";
-    public static final String FIELD_ROW_KEY = "rowKey";
+    public static final String FIELD_ROW_KEY = "ipAddress";
     public static final Fields fields = new Fields(
-            FIELD_ROW_KEY,
-            FIELD_RETURN_COLUMNS
+            FIELD_ROW_KEY
+
     );
 
 
