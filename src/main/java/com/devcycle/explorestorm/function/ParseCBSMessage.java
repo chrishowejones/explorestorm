@@ -1,6 +1,7 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
+import org.apache.storm.jetty.util.ajax.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -166,6 +167,7 @@ public class ParseCBSMessage extends BaseFunction {
     private static final String FIELD_SEQNUM = "SEQNUM";
     private static final String FIELD_T_IPTETIME = "tIPTETIME";
     private static final String FIELD_T_IPPBR = "tIPPBR";
+    private static final String FIELD_T_IPPSTEM = "tIPPSTEM";
     private Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
 
     @Override
@@ -209,9 +211,10 @@ public class ParseCBSMessage extends BaseFunction {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(jsonMessage);
-            fieldsMap.put(FIELD_SEQNUM, jsonObject.getInt(FIELD_SEQNUM));
-            fieldsMap.put(FIELD_T_IPTETIME, jsonObject.getLong(FIELD_T_IPTETIME));
-            fieldsMap.put(FIELD_T_IPPBR, jsonObject.getInt(FIELD_T_IPPBR));
+            fieldsMap.put(FIELD_SEQNUM, parseInt(jsonObject, FIELD_SEQNUM));
+            fieldsMap.put(FIELD_T_IPTETIME, parseLong(jsonObject, FIELD_T_IPTETIME));
+            fieldsMap.put(FIELD_T_IPPBR, parseInt(jsonObject, FIELD_T_IPPBR));
+            fieldsMap.put(FIELD_T_IPPSTEM, parseLong(jsonObject, FIELD_T_IPPSTEM));
             // TODO rest of fields
         } catch (JSONException e) {
             LOG.error("Error in JSON: " + jsonMessage, e);
@@ -219,4 +222,19 @@ public class ParseCBSMessage extends BaseFunction {
 
         return fieldsMap;
     }
+
+    private Long parseLong(JSONObject json, String key) throws JSONException {
+        Long returnLong = null;
+        if (json.has(key))
+            returnLong = json.getLong(key);
+        return returnLong;
+    }
+
+    private Integer parseInt(JSONObject json, String key) throws JSONException {
+        Integer returnInt = null;
+        if (json.has(key))
+            returnInt = json.getInt(key);
+        return returnInt;
+    }
 }
+

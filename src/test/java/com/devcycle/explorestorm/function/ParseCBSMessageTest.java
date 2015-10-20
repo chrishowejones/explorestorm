@@ -198,7 +198,7 @@ public class ParseCBSMessageTest {
     @Test
     public void testParseT_IPTETIME() {
         ParseCBSMessage parseMessage = new ParseCBSMessage();
-        // check parse sequence number
+        // check parse time in milliseconds since midnight
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
         assertThat(fieldMap.get("tIPTETIME"), is((Object) T_IPTETIME));
@@ -208,11 +208,21 @@ public class ParseCBSMessageTest {
     @Test
     public void testParseT_IPPBR() {
         ParseCBSMessage parseMessage = new ParseCBSMessage();
-        // check parse sequence number
+        // check parse branch code
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPPBR"), is(true));
         assertThat(fieldMap.get("tIPPBR"), is((Object) T_IPPBR));
         assertThat(fieldMap.get("tIPPBR"), instanceOf(Integer.class));
+    }
+
+    @Test
+    public void testParseT_IPPSTEM() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
+        assertThat(fieldMap.containsKey("tIPPSTEM"), is(true));
+        assertThat(fieldMap.get("tIPPSTEM"), is((Object) T_IPPSTEM));
+        assertThat(fieldMap.get("tIPPSTEM"), instanceOf(Long.class));
     }
 
     private TridentTuple givenJSONTuple() {
