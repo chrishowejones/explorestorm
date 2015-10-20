@@ -11,6 +11,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -206,6 +207,15 @@ public class ParseCBSMessageTest {
     }
 
     @Test
+    public void testParseT_IPTETIME_Null() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        String testJSON = "{\"tIPTETIME\":null}";
+        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
+        assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
+        assertThat(fieldMap.get("tIPTETIME"), nullValue());
+    }
+
+    @Test
     public void testParseT_IPPBR() {
         ParseCBSMessage parseMessage = new ParseCBSMessage();
         // check parse branch code
@@ -243,6 +253,62 @@ public class ParseCBSMessageTest {
         assertThat(fieldMap.containsKey("tIPTCLCDE"), is(true));
         assertThat(fieldMap.get("tIPTCLCDE"), is((Object) T_IPTCLCDE));
         assertThat(fieldMap.get("tIPTCLCDE"), instanceOf(Integer.class));
+    }
+
+    @Test
+    public void testParseT_IPTAM() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
+        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
+        assertThat(fieldMap.get("tIPTAM"), is((Object) T_IPTAM));
+        assertThat(fieldMap.get("tIPTAM"), instanceOf(Double.class));
+    }
+
+    @Test
+    public void testParseT_IPTAM_Zero() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        String testJSON = "{\"tIPTAM\":0}";
+
+        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
+        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
+        assertThat(fieldMap.get("tIPTAM"), is((Object) new Double(0)));
+        assertThat(fieldMap.get("tIPTAM"), instanceOf(Double.class));
+    }
+
+    @Test
+    public void testParseT_IPTAM_TenPence() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        String testJSON = "{\"tIPTAM\":10}";
+
+        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
+        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
+        assertThat(fieldMap.get("tIPTAM"), is((Object) new Double(0.1)));
+        assertThat(fieldMap.get("tIPTAM"), instanceOf(Double.class));
+    }
+
+    @Test
+    public void testParseT_IPTAM_OnePence() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        String testJSON = "{\"tIPTAM\":1}";
+
+        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
+        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
+        assertThat(fieldMap.get("tIPTAM"), is((Object) new Double(0.01)));
+        assertThat(fieldMap.get("tIPTAM"), instanceOf(Double.class));
+    }
+
+    @Test
+    public void testParseT_IPTAM_null() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        String testJSON = "{\"tIPTAM\":null}";
+        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
+        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
+        assertThat(fieldMap.get("tIPTAM"), nullValue());
     }
 
     private TridentTuple givenJSONTuple() {

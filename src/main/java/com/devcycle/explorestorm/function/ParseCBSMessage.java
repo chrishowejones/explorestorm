@@ -10,6 +10,8 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -170,6 +172,7 @@ public class ParseCBSMessage extends BaseFunction {
     private static final String FIELD_T_IPPSTEM = "tIPPSTEM";
     private static final String FIELD_T_IPTTST = "tIPTTST";
     private static final String FIELD_T_IPTCLCDE = "tIPTCLCDE";
+    private static final String FIELD_T_IPTAM = "tIPTAM";
     private Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
 
     @Override
@@ -219,6 +222,7 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap.put(FIELD_T_IPPSTEM, parseLong(jsonObject, FIELD_T_IPPSTEM));
             fieldsMap.put(FIELD_T_IPTTST, parseInt(jsonObject, FIELD_T_IPTTST));
             fieldsMap.put(FIELD_T_IPTCLCDE, parseInt(jsonObject, FIELD_T_IPTCLCDE));
+            fieldsMap.put(FIELD_T_IPTAM, parseDouble(jsonObject, FIELD_T_IPTAM));
             // TODO rest of fields
         } catch (JSONException e) {
             LOG.error("Error in JSON: " + jsonMessage, e);
@@ -227,16 +231,51 @@ public class ParseCBSMessage extends BaseFunction {
         return fieldsMap;
     }
 
+    private Double parseDouble(JSONObject json, String key) throws JSONException {
+        Double returnDouble = null;
+        if (json.has(key) && !json.isNull(key)) {
+            String numberStringValue = json.getString(key).trim();
+             String doubleStringValue = buildDoubleString(numberStringValue);
+                try {
+                    Number number = NumberFormat.getInstance().parse(doubleStringValue);
+                    returnDouble = number.doubleValue();
+                } catch (ParseException e) {
+                    LOG.error("Can't parse " + key + "=" + doubleStringValue, e);
+                }
+
+        }
+        return returnDouble;
+    }
+
+    private String buildDoubleString(String numberStringValue) {
+        String doubleStringValue  = "0.00";
+        switch (numberStringValue.length()) {
+                case 0:
+                case 1:
+                    // add 0.0 to start
+                    doubleStringValue = "0.0" + numberStringValue;
+                    break;
+                case 2:
+                    // add decimal point at start
+                    doubleStringValue = "0." + numberStringValue;
+                    break;
+                default:
+                    // add decimal point at position 2 from end of string
+                    doubleStringValue = numberStringValue.substring(0, numberStringValue.length() - 2) + "." + numberStringValue.substring(numberStringValue.length() - 2);
+            }
+        return doubleStringValue;
+    }
+
     private Long parseLong(JSONObject json, String key) throws JSONException {
         Long returnLong = null;
-        if (json.has(key))
+        if (json.has(key) && !json.isNull(key))
             returnLong = json.getLong(key);
         return returnLong;
     }
 
     private Integer parseInt(JSONObject json, String key) throws JSONException {
         Integer returnInt = null;
-        if (json.has(key))
+        if (json.has(key) && !json.isNull(key))
             returnInt = json.getInt(key);
         return returnInt;
     }
