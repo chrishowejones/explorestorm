@@ -225,7 +225,6 @@ public class ParseCBSMessageTest {
         assertThat(fieldMap.get("tIPPSTEM"), instanceOf(Long.class));
     }
 
-
     @Test
     public void testParseT_IPTTST() {
         ParseCBSMessage parseMessage = new ParseCBSMessage();
@@ -234,6 +233,16 @@ public class ParseCBSMessageTest {
         assertThat(fieldMap.containsKey("tIPTTST"), is(true));
         assertThat(fieldMap.get("tIPTTST"), is((Object) T_IPTTST));
         assertThat(fieldMap.get("tIPTTST"), instanceOf(Integer.class));
+    }
+
+    @Test
+    public void testParseT_IPTCLCDE() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage();
+        // check parse account number
+        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
+        assertThat(fieldMap.containsKey("tIPTCLCDE"), is(true));
+        assertThat(fieldMap.get("tIPTCLCDE"), is((Object) T_IPTCLCDE));
+        assertThat(fieldMap.get("tIPTCLCDE"), instanceOf(Integer.class));
     }
 
     private TridentTuple givenJSONTuple() {

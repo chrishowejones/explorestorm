@@ -169,6 +169,7 @@ public class ParseCBSMessage extends BaseFunction {
     private static final String FIELD_T_IPPBR = "tIPPBR";
     private static final String FIELD_T_IPPSTEM = "tIPPSTEM";
     private static final String FIELD_T_IPTTST = "tIPTTST";
+    private static final String FIELD_T_IPTCLCDE = "tIPTCLCDE";
     private Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
 
     @Override
@@ -217,6 +218,7 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap.put(FIELD_T_IPPBR, parseInt(jsonObject, FIELD_T_IPPBR));
             fieldsMap.put(FIELD_T_IPPSTEM, parseLong(jsonObject, FIELD_T_IPPSTEM));
             fieldsMap.put(FIELD_T_IPTTST, parseInt(jsonObject, FIELD_T_IPTTST));
+            fieldsMap.put(FIELD_T_IPTCLCDE, parseInt(jsonObject, FIELD_T_IPTCLCDE));
             // TODO rest of fields
         } catch (JSONException e) {
             LOG.error("Error in JSON: " + jsonMessage, e);
