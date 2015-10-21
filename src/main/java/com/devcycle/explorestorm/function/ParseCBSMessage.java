@@ -10,14 +10,16 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
-import java.text.NumberFormat;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Trident function to parse CBS message from a String.
- *
+ * <p/>
  * Created by chrishowe-jones on 20/10/15.
  */
 public class ParseCBSMessage extends BaseFunction {
@@ -166,32 +168,55 @@ public class ParseCBSMessage extends BaseFunction {
 
 
     public static final String FIELD_JSON_STRING = "jsonString";
-    private static final String FIELD_SEQNUM = "SEQNUM";
-    private static final String FIELD_T_IPTETIME = "tIPTETIME";
-    private static final String FIELD_T_IPPBR = "tIPPBR";
-    private static final String FIELD_T_IPPSTEM = "tIPPSTEM";
-    private static final String FIELD_T_IPTTST = "tIPTTST";
-    private static final String FIELD_T_IPTCLCDE = "tIPTCLCDE";
-    private static final String FIELD_T_IPTAM = "tIPTAM";
+    public static final String FIELD_SEQNUM = "SEQNUM";
+    public static final String FIELD_T_IPTETIME = "tIPTETIME";
+    public static final String FIELD_T_IPPBR = "tIPPBR";
+    public static final String FIELD_T_IPPSTEM = "tIPPSTEM";
+    public static final String FIELD_T_IPTTST = "tIPTTST";
+    public static final String FIELD_T_IPTCLCDE = "tIPTCLCDE";
+    public static final String FIELD_T_IPTAM = "tIPTAM";
+    public static final String FIELD_T_IPCURCDE = "tIPCURCDE";
+    public static final String FIELD_T_HIACBL = "tHIACBL";
+    public static final String FIELD_T_IPCDATE = "tIPCDATE";
+    public static final String FIELD_T_IPTD = "tIPTD";
+    public static final String FIELD_T_IPTXNARR = "tIPTXNARR";
+    public static final String FIELD_FULL_MESSAGE = "fullMessage";
+
     private Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
 
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
         String json = tuple.getStringByField(FIELD_JSON_STRING);
         // TODO correctly parse the json
-        Integer SEQNUM = 1; // sequence number
-        Long tIPTETIME = 153236L; // time in milliseconds since midnight
-        Integer tIPPBR = 2021; // Branch code
-        Long tIPPSTEM = 987654321L; // Account number - should this and sort code be strings?
-        Integer tIPTTST = 123; // transaction type/subtype
-        Integer tIPTCLCDE = 999; // transaction class/code
-        Double tIPTAM = 100000000.00; // Amount (assumed decimal in json)
-        Integer tIPCURCDE = 12; // currency code
-        Double tHIACBL = 1234567890.99; // running balance
-        Long tIPCDATE = 151013L; // calendar date
-        Long tIPTD = null; // processing date
-        String tIPTXNARR = null; // narative (optional)
-        String entireJSONString = ParseCBSMessage.expectedJSON;
+//        Integer SEQNUM = 1; // sequence number
+//        Long tIPTETIME = 153236L; // time in milliseconds since midnight
+//        Integer tIPPBR = 2021; // Branch code
+//        Long tIPPSTEM = 987654321L; // Account number - should this and sort code be strings?
+//        Integer tIPTTST = 123; // transaction type/subtype
+//        Integer tIPTCLCDE = 999; // transaction class/code
+//        BigDecimal tIPTAM = new BigDecimal("100000000.00", new MathContext(2)); // Amount (assumed decimal in json)
+//        Integer tIPCURCDE = 12; // currency code
+//        BigDecimal tHIACBL = new BigDecimal("1234567890.99", new MathContext(2)); // running balance
+//        String tIPCDATE = "2015-10-13"; // calendar date
+//        String tIPTD = null; // processing date
+//        String tIPTXNARR = null; // narative (optional)
+//        String entireJSONString = ParseCBSMessage.expectedJSON;
+//
+//        Values expectedValuesFromMessage = new Values(
+//                SEQNUM,
+//                tIPTETIME,
+//                tIPPBR,
+//                tIPPSTEM,
+//                tIPTTST,
+//                tIPTCLCDE,
+//                tIPTAM,
+//                tIPCURCDE,
+//                tHIACBL,
+//                tIPCDATE,
+//                tIPTD,
+//                tIPTXNARR,
+//                entireJSONString
+//        );
 
         Values expectedValuesFromMessage = new Values(
                 SEQNUM,
@@ -222,47 +247,69 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap.put(FIELD_T_IPPSTEM, parseLong(jsonObject, FIELD_T_IPPSTEM));
             fieldsMap.put(FIELD_T_IPTTST, parseInt(jsonObject, FIELD_T_IPTTST));
             fieldsMap.put(FIELD_T_IPTCLCDE, parseInt(jsonObject, FIELD_T_IPTCLCDE));
-            fieldsMap.put(FIELD_T_IPTAM, parseDouble(jsonObject, FIELD_T_IPTAM));
-            // TODO rest of fields
+            fieldsMap.put(FIELD_T_IPTAM, parseBigDecimal(jsonObject, FIELD_T_IPTAM));
+            fieldsMap.put(FIELD_T_IPCURCDE, parseInt(jsonObject, FIELD_T_IPCURCDE));
+            fieldsMap.put(FIELD_T_HIACBL, parseBigDecimal(jsonObject, FIELD_T_HIACBL));
+            fieldsMap.put(FIELD_T_IPCDATE, parseDateString(jsonObject, FIELD_T_IPCDATE));
+            fieldsMap.put(FIELD_T_IPTD, parseDateString(jsonObject, FIELD_T_IPTD));
+            fieldsMap.put(FIELD_T_IPTXNARR, parseString(jsonObject, FIELD_T_IPTXNARR));
+            fieldsMap.put(FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
             LOG.error("Error in JSON: " + jsonMessage, e);
         }
-
         return fieldsMap;
     }
 
-    private Double parseDouble(JSONObject json, String key) throws JSONException {
-        Double returnDouble = null;
-        if (json.has(key) && !json.isNull(key)) {
-            String numberStringValue = json.getString(key).trim();
-             String doubleStringValue = buildDoubleString(numberStringValue);
-                try {
-                    Number number = NumberFormat.getInstance().parse(doubleStringValue);
-                    returnDouble = number.doubleValue();
-                } catch (ParseException e) {
-                    LOG.error("Can't parse " + key + "=" + doubleStringValue, e);
-                }
-
+    private String parseString(JSONObject json, String key) throws JSONException {
+        String value = null;
+        if(json.has(key) && !json.isNull(key)) {
+            value = json.getString(key);
         }
-        return returnDouble;
+        return value;
     }
 
-    private String buildDoubleString(String numberStringValue) {
-        String doubleStringValue  = "0.00";
-        switch (numberStringValue.length()) {
-                case 0:
-                case 1:
-                    // add 0.0 to start
-                    doubleStringValue = "0.0" + numberStringValue;
-                    break;
-                case 2:
-                    // add decimal point at start
-                    doubleStringValue = "0." + numberStringValue;
-                    break;
-                default:
-                    // add decimal point at position 2 from end of string
-                    doubleStringValue = numberStringValue.substring(0, numberStringValue.length() - 2) + "." + numberStringValue.substring(numberStringValue.length() - 2);
+    private String parseDateString(JSONObject json, String key) throws JSONException {
+        String dateString = null;
+        if (json.has(key) && !json.isNull(key)) {
+            String yymmdd = json.getString(key);
+            SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyMMdd");
+            try {
+                SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                dateString = outputDateFormat.format(inputDateFormat.parse(yymmdd));
+            } catch (ParseException e) {
+                LOG.error("Can't parse date " + key + ": " + yymmdd, e);
             }
+        }
+
+        return dateString;
+    }
+
+    private BigDecimal parseBigDecimal(JSONObject json, String key) throws JSONException {
+        BigDecimal bigDecimal = null;
+        if (json.has(key) && !json.isNull(key)) {
+            String numberStringValue = json.getString(key).trim();
+            String bigDecimalString = buildBigDecimalString(numberStringValue);
+            bigDecimal = new BigDecimal(bigDecimalString, new MathContext(2));
+        }
+        return bigDecimal;
+    }
+
+    private String buildBigDecimalString(String numberStringValue) {
+        String doubleStringValue = "0.00";
+        switch (numberStringValue.length()) {
+            case 0:
+            case 1:
+                // add 0.0 to start
+                doubleStringValue = "0.0" + numberStringValue;
+                break;
+            case 2:
+                // add decimal point at start
+                doubleStringValue = "0." + numberStringValue;
+                break;
+            default:
+                // add decimal point at position 2 from end of string
+                doubleStringValue = numberStringValue.substring(0, numberStringValue.length() - 2) + "." + numberStringValue.substring(numberStringValue.length() - 2);
+        }
         return doubleStringValue;
     }
 
