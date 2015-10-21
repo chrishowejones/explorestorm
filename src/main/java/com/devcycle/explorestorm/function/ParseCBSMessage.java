@@ -1,7 +1,7 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
-import org.apache.storm.jetty.util.ajax.JSON;
+import com.devcycle.explorestorm.message.MessageTuple;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -218,22 +218,12 @@ public class ParseCBSMessage extends BaseFunction {
 //                entireJSONString
 //        );
 
-        Values expectedValuesFromMessage = new Values(
-                SEQNUM,
-                tIPTETIME,
-                tIPPBR,
-                tIPPSTEM,
-                tIPTTST,
-                tIPTCLCDE,
-                tIPTAM,
-                tIPCURCDE,
-                tHIACBL,
-                tIPCDATE,
-                tIPTD,
-                tIPTXNARR,
-                entireJSONString
-        );
+        Values expectedValuesFromMessage = new Values(parse(json));
         collector.emit(expectedValuesFromMessage);
+    }
+
+     MessageTuple parseToTuples(String jsonMessage) {
+        return new MessageTuple(parse(jsonMessage));
     }
 
     Map<String, Object> parse(String jsonMessage) {

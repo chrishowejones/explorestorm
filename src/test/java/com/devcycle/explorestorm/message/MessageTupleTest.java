@@ -32,6 +32,17 @@ public class MessageTupleTest {
         assertThat(tuple.isEmpty(), is(false));
     }
 
-
+    @Test
+    public void testGetFields() {
+        Map<String, Object> fieldValuesMap = new HashMap<>();
+        String test = "test";
+        fieldValuesMap.put(test, "test message");
+        String again = "again";
+        fieldValuesMap.put(again, "another message");
+        MessageTuple tuple = new MessageTuple(fieldValuesMap);
+        assertThat(tuple.getFields(), notNullValue());
+        assertThat(tuple.getFields().contains(test), is(true));
+        assertThat(tuple.getFields().contains(again), is(true));
+    }
 
 }
