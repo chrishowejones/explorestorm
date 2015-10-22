@@ -18,6 +18,8 @@ public class StormRunner {
 
     private static final int MILLIS_IN_SEC = 1000;
 
+    public static final String REMOTE = "remote";
+
     private StormRunner() {
     }
 
