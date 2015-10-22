@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
+ * Base class for Topologies.
+ *
  * Created by chrishowe-jones on 17/09/15.
  */
 public abstract class BaseExploreTopology {
@@ -34,7 +36,20 @@ public abstract class BaseExploreTopology {
      * @throws IOException
      */
     public BaseExploreTopology(String configFileLocation) throws IOException {
-        loadTopologyConfig(configFileLocation);
+        setTopologyConfig(loadTopologyConfig(configFileLocation));
+    }
+
+    /**
+     * Create base class for topologies.
+     *
+     * @param configProperties - config properties file.
+     */
+    public BaseExploreTopology(Properties configProperties) {
+        setTopologyConfig(configProperties);
+    }
+
+    public void setTopologyConfig(Properties topologyConfig) {
+        this.topologyConfig = topologyConfig;
     }
 
     /**
@@ -43,9 +58,10 @@ public abstract class BaseExploreTopology {
      * @param configFileLocation
      * @throws IOException
      */
-    protected void loadTopologyConfig(String configFileLocation) throws IOException {
-        topologyConfig = new Properties();
-        topologyConfig.load(ClassLoader.getSystemResourceAsStream(configFileLocation));
+    protected Properties loadTopologyConfig(String configFileLocation) throws IOException {
+        Properties config = new Properties();
+        config.load(ClassLoader.getSystemResourceAsStream(configFileLocation));
+        return config;
     }
 
     /*
@@ -85,4 +101,6 @@ public abstract class BaseExploreTopology {
         LocalCluster cluster = new LocalCluster(LOCALCLUSTERHOST, LOCALCLUSTERPORT);
         StormRunner.runTopologyLocally(topology, topologyName, conf, RUNTIME_IN_SECONDS);
     }
+
+
 }
