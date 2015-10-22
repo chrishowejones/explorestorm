@@ -1,6 +1,9 @@
 package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
+import backtype.storm.generated.AlreadyAliveException;
+import backtype.storm.generated.AuthorizationException;
+import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
@@ -9,6 +12,7 @@ import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
+import com.devcycle.explorestorm.util.StormRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storm.kafka.BrokerHosts;
@@ -24,6 +28,7 @@ import java.util.Properties;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
 import static com.devcycle.explorestorm.topologies.KafkaConfig.KAFKA_ZOOKEEPER_HOST_PORT;
+import static com.devcycle.explorestorm.util.StormRunner.REMOTE;
 
 /**
  * Topology to read CBS messages from kafka and persist them to HBase.
@@ -34,9 +39,12 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
 
     public static final String STREAM_NAME = "CbsHBaseStream";
+    public static final String EXPLORE_TOPOLOGY_PROPERTIES = "explore_topology.properties";
+
     private static final Logger LOG = LoggerFactory.getLogger(PersistCBSTopology.class);
     private static final java.lang.String KAFKA_TOPIC = "CBSTopic";
     private static final String TRIDENT_KAFKA_SPOUT = "CBSMessageSpout";
+    private static final String TOPOLOGY_NAME = "persistCBSTopology";
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
     private OpaqueTridentKafkaSpout kafkaSpout;
@@ -53,6 +61,26 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
     public PersistCBSTopology(Properties configProperties) {
         super(configProperties);
+    }
+
+    /**
+     * Main method that creates and submits this topology to Storm.
+     *
+     * @param args - if the first argument is "remote" then submit this topology to a remote cluster, otherwise run on a local cluster.
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException, InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
+        String configFileLocation = EXPLORE_TOPOLOGY_PROPERTIES;
+        boolean runLocally = true;
+        String hbaseRoot;
+        PersistCBSTopology persistCBSTopology;
+        if (args.length >= 1 && args[0].trim().equalsIgnoreCase(REMOTE)) {
+            runLocally = false;
+        }
+        persistCBSTopology
+                    = new PersistCBSTopology(configFileLocation);
+
+        persistCBSTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
 
     public Scheme getCBSKafkaScheme() {
