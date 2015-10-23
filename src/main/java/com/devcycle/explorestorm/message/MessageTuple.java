@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class MessageTuple {
 
-    private final boolean empty;
+    private boolean empty = false;
     private Logger LOG = LoggerFactory.getLogger(MessageTuple.class);
     private Fields fields;
     private Values values;
@@ -26,19 +26,27 @@ public class MessageTuple {
      * @param fieldValueMap - map of field names to object values that will be encapsulated by this tuple.
      */
     public MessageTuple(Map<String, Object> fieldValueMap) {
-        if (fieldValueMap == null)
-            throw new IllegalArgumentException("Field Value Map cannot be null.");
-        if (fieldValueMap.isEmpty())
-            throw new IllegalArgumentException("Field Value Map cannot be empty");
         LOG.trace("Created MessageTuple from map");
-        empty = fieldValueMap.isEmpty();
+        isMapEmpty(fieldValueMap);
         loadKeyValues(fieldValueMap);
     }
 
+    private void isMapEmpty(Map<String, Object> fieldValueMap) {
+        if (fieldValueMap != null)
+            empty = fieldValueMap.isEmpty();
+    }
+
     private void loadKeyValues(Map<String, Object> fieldValueMap) {
-        fields = new Fields(new ArrayList(fieldValueMap.keySet()));
+        fields = buildFields(fieldValueMap);
         values = new Values();
-        values.addAll(fieldValueMap.values());
+        if (fieldValueMap != null && !fieldValueMap.isEmpty())
+            values.addAll(fieldValueMap.values());
+    }
+
+    private Fields buildFields(Map<String, Object> fieldValueMap) {
+        if (fieldValueMap == null)
+            return new Fields();
+        return new Fields(new ArrayList(fieldValueMap.keySet()));
     }
 
     /**

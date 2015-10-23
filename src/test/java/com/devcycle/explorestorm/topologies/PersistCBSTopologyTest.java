@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 
 /**
- * Created by chrishowe-jones on 21/10/15.
+ * Created by chris howe-jones on 21/10/15.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PersistCBSTopologyTest {
@@ -72,7 +72,6 @@ public class PersistCBSTopologyTest {
     }
 
     private void givenCbsKafkaSpout() {
-        // TODO mock set up
         when(mockCbsKafkaScheme.getOutputFields()).thenReturn(new Fields());
     }
 

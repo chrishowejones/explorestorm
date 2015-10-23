@@ -92,4 +92,31 @@ public class TestJson {
         assertThat(line.get("tIPTD"), is(JSONObject.NULL));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
+
+    @Test
+    public void testThirdLine() throws JSONException {
+        readLine();
+        readLine();
+        JSONObject line = parseLine(readLine());
+        assertThat(line.length(), is(1241));
+        assertThat(line.getInt("SEQNUM"), is(3));
+        assertThat(line.getInt("tIPPBR"), is(0));
+        assertThat(line.getLong("tIPPSTEM"), is(0L));
+        assertThat(line.getLong("tIPTTST"), is(201L));
+        assertThat(line.getLong("tIPTCLCDE"), is(65737L));
+        assertThat(line.getLong("tIPTAM"), is(0L));
+        assertThat(line.getLong("tIPCURCDE"), is(0L));
+        assertThat(line.getLong("tHIACBL"), is(165119L));
+        assertThat(line.getLong("tIPCDATE"), is(151013L));
+        assertThat(line.get("tIPTD"), is(JSONObject.NULL));
+        assertThat(line.has("tIPTXNARR"), is(false));
+    }
+
+    @Test
+    public void testSpacesInJSON() throws JSONException {
+        String spaces = "{\"spaces\":\"    \"}";
+        JSONObject jsonObject = new JSONObject(spaces);
+        assertThat(jsonObject.getString("spaces"), is("    "));
+
+    }
 }
