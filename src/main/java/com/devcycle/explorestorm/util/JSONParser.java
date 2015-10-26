@@ -34,7 +34,7 @@ public class JSONParser implements Serializable {
                 SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 dateString = outputDateFormat.format(inputDateFormat.parse(yymmdd));
             } catch (ParseException e) {
-                LOG.error("Can't parse date " + key + ": " + yymmdd, e);
+                LOG.warn("Can't parse date " + key + ": " + yymmdd +" emiting ≈", e);
             }
         }
 

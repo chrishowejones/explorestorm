@@ -2,6 +2,7 @@ package com.devcycle.explorestorm.message;
 
 import backtype.storm.tuple.Values;
 import org.apache.commons.digester.Rules;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -11,9 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -72,17 +71,17 @@ public class MessageTupleTest {
     }
 
     @Test
-    public void throwsIllegalArgumentExceptionIfNullMapConstructor() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("null"));
-        new MessageTuple(null);
+    public void ReturnsEmptyValuesIfNullMapConstructor() {
+        MessageTuple tuple = new MessageTuple(null);
+        assertThat(tuple.getFields().size(), is(0));
+        assertThat(tuple.getValues().size(), is(0));
      }
 
     @Test
-    public void throwsIllegalArgumentExceptionIfEmptyMapConstructor() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("empty"));
-        new MessageTuple(new HashMap<String, Object>());
+    public void ReturnsEmptyValuesIfEmptyMapConstructor() {
+        MessageTuple tuple = new MessageTuple(new HashMap<String, Object>());
+        assertThat(tuple.getFields().size(), is(0));
+        assertThat(tuple.getValues().size(), is(0));
     }
 
 }

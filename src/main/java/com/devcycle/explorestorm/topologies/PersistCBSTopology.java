@@ -9,6 +9,9 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
+import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
+import com.devcycle.explorestorm.function.ExploreTransformMessage;
+import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
@@ -105,7 +108,9 @@ public class PersistCBSTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
         topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new PrintFunction(), new Fields());
+                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
+                .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
+                .each(ParseCBSMessage.getEmittedFields(), new PrintFunction(), new Fields());
         return topology.build();
     }
 
