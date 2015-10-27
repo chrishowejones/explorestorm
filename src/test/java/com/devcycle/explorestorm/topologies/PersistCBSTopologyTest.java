@@ -14,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import storm.kafka.trident.OpaqueTridentKafkaSpout;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -78,7 +79,7 @@ public class PersistCBSTopologyTest {
     @Test
     public void testBuildHBaseStateFactory() {
         PersistCBSTopology topology = new PersistCBSTopology(mockConfigProperties);
-        HBaseStateFactory factory = topology.buildCBSHBaseStateFactory(ParseCBSMessage.getEmittedFields());
+        HBaseStateFactory factory = topology.buildCBSHBaseStateFactory(new ArrayList<String>());
         assertThat(factory, notNullValue());
     }
 

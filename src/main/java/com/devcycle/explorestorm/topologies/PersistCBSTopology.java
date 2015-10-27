@@ -19,12 +19,14 @@ import org.apache.hadoop.hbase.client.Durability;
 import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
 import org.apache.storm.hbase.trident.state.HBaseState;
 import org.apache.storm.hbase.trident.state.HBaseStateFactory;
+import org.apache.storm.hbase.trident.state.HBaseUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storm.kafka.BrokerHosts;
 import storm.kafka.ZkHosts;
 import storm.kafka.trident.OpaqueTridentKafkaSpout;
 import storm.kafka.trident.TridentKafkaConfig;
+import storm.trident.Stream;
 import storm.trident.TridentTopology;
 
 import java.io.IOException;
@@ -141,8 +143,14 @@ public class PersistCBSTopology extends BaseExploreTopology {
         Scheme cbsKafkaScheme = getCBSKafkaScheme();
 
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
-        HBaseStateFactory cbsHBaseStateFactory = buildCBSHBaseStateFactory(ParseCBSMessage.getEmittedFields());
 
+        // Create trident stream to read, parse and transform CBS message ready for persisting
+        final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
+                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
+                .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
+                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
+
+        // set up HBase state factory
         Fields transformedFields = new Fields(
                 ParseCBSMessage.FIELD_SEQNUM,
                 ParseCBSMessage.FIELD_T_IPTETIME,
@@ -160,32 +168,28 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 ROW_KEY_FIELD
         );
 
-
-        topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
-                .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
-                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD))
-                .each(transformedFields, new PrintFunction(), new Fields());
+        List<String> fieldsToPersist = new ArrayList<>();
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
+        HBaseStateFactory factory = buildCBSHBaseStateFactory(fieldsToPersist);
+        stream.partitionPersist(factory, transformedFields, new HBaseUpdater());
         return topology;
     }
 
     /**
      * Build CBS HBase State factory for the CBS messages that will be queried by transactions per account per day (Statement queries)
      *
-     * @param fieldsInStream- fields in stream.
+     * @param fieldsToPersist- fields to persist in HBase.
      * @return HBaseStateFactory
      */
-    HBaseStateFactory buildCBSHBaseStateFactory(Fields fieldsInStream) {
+    HBaseStateFactory buildCBSHBaseStateFactory(List<String> fieldsToPersist) {
         List<String> columnFamilies = new ArrayList<>();
         columnFamilies.add(STATEMENT_DATA_CF);
 
-        List<String> columnFieldPrefixes = new ArrayList<>();
-        columnFieldPrefixes.add(ParseCBSMessage.FIELD_T_IPTETIME);
 
         TridentHBaseMapper tridentHBaseMapper = new AccountTransactionMapper()
                 .withRowKeyField(ROW_KEY_FIELD)
                 .withColumnFamilies(columnFamilies)
-                .withColumnFieldPrefixes(STATEMENT_DATA_CF, columnFieldPrefixes);
+                .withColumnFieldPrefixes(STATEMENT_DATA_CF, fieldsToPersist);
         HBaseState.Options options = new HBaseState.Options()
                 .withConfigKey(HBASE_CONFIG.toString())
                 .withDurability(Durability.SYNC_WAL)
