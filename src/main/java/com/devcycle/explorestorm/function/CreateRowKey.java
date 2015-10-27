@@ -19,7 +19,7 @@ public class CreateRowKey extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        Long sequenceNumber = tuple.getLongByField(ParseCBSMessage.FIELD_SEQNUM);
+        Integer sequenceNumber = tuple.getIntegerByField(ParseCBSMessage.FIELD_SEQNUM);
         String transactionDate = tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD);
         String rowKey = sequenceNumber + "-" + transactionDate;
         collector.emit(new Values(rowKey));

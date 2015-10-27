@@ -22,7 +22,7 @@ public class CreateRowKeyTest {
     public void testExecute() {
         CreateRowKey transform = new CreateRowKey();
         TridentTuple tuple = mock(TridentTuple.class);
-        Mockito.when(tuple.getLongByField(ParseCBSMessage.FIELD_SEQNUM)).thenReturn(123L);
+        Mockito.when(tuple.getIntegerByField(ParseCBSMessage.FIELD_SEQNUM)).thenReturn(123);
         Mockito.when(tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD)).thenReturn("2015-10-27");
         TridentCollector collector = mock(TridentCollector.class);
         transform.execute(tuple, collector);
