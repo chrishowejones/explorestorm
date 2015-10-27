@@ -19,6 +19,7 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
     private String rowKeyField;
     private List<String> columnFamilies = new ArrayList<String>();
     private Map<String, List<String>> columnFieldPrefixes = new HashMap<String, List<String>>();
+    private String transactionId;
 
     /**
      * Specify the RowKey field name.
@@ -86,15 +87,22 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
         for (String family : columnFamilies) {
             for (String fieldPrefix : columnFieldPrefixes.get(family)) {
                 columns.addColumn(family.getBytes(),
-                        buildFieldName(fieldPrefix, tridentTuple.getValueByField(rowKeyField)),
+                        buildFieldName(fieldPrefix, tridentTuple.getValueByField(transactionId)),
                         toBytes(tridentTuple.getValueByField(fieldPrefix)));
             }
         }
         return columns;
     }
 
-    private byte[] buildFieldName(String fieldPrefix, Object rowKeyValue) {
-        String fieldName = fieldPrefix + ":" + ((Integer)rowKeyValue).toString();
+    public AccountTransactionMapper withTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+        return this;
+    }
+
+
+
+    private byte[] buildFieldName(String fieldPrefix, Object transactionId) {
+        String fieldName = fieldPrefix + ":" + ((Integer)transactionId).toString();
         return fieldName.getBytes();
     }
 
@@ -107,6 +115,9 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
         return columnFamilies;
     }
 
+    String getTransactionId() {
+        return transactionId;
+    }
 
     /**
      * Return row key field.

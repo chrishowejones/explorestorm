@@ -188,6 +188,16 @@ public class AccountTransactionMapperTest {
     }
 
     @Test
+    public void testWithTransactionId() {
+        AccountTransactionMapper mapper = new AccountTransactionMapper();
+        final String transactionId = "SEQNUM";
+
+        mapper = mapper.withTransactionId(transactionId);
+        assertThat(mapper, notNullValue());
+        assertThat(mapper.getTransactionId(), is(transactionId));
+    }
+
+    @Test
     public void testColumnsOneColumn() {
         AccountTransactionMapper mapper = new AccountTransactionMapper();
         List<String> columnFieldPrefixesCF1 = new ArrayList<String>();
@@ -197,7 +207,8 @@ public class AccountTransactionMapperTest {
         Long accNumValue = 123456l;
 
         columnFieldPrefixesCF1.add(accNumField);
-        mapper.withRowKeyField(seqnumField);
+        mapper.withRowKeyField("account-txnDate");
+        mapper.withTransactionId(seqnumField);
 
         List<String> columnFamilies = new ArrayList<>();
         columnFamilies.add(columnFamily);
@@ -237,7 +248,8 @@ public class AccountTransactionMapperTest {
 
         columnFieldPrefixesCF1.add(accNumField);
         columnFieldPrefixesCF1.add(txnDate);
-        mapper.withRowKeyField(seqnumField);
+        mapper.withRowKeyField("account-txnDate");
+        mapper.withTransactionId(seqnumField);
 
         List<String> columnFamilies = new ArrayList<>();
         columnFamilies.add(columnFamily);
@@ -278,7 +290,7 @@ public class AccountTransactionMapperTest {
         List<String> columnFieldPrefixesCF2 = new ArrayList<String>();
         final String columnFamily = "cf";
         final String columnFamily2 = "cf2";
-        final String seqnumField = "seqnum";
+        final String seqnumField = "SEQNUM";
         final String accNumField = "accnum";
         final String txnDate = "txndate";
         final String fullmsg = "fullmsg";
@@ -289,7 +301,8 @@ public class AccountTransactionMapperTest {
         columnFieldPrefixesCF1.add(accNumField);
         columnFieldPrefixesCF1.add(txnDate);
         columnFieldPrefixesCF2.add(fullmsg);
-        mapper.withRowKeyField(seqnumField);
+        mapper.withRowKeyField("account-txnDate");
+        mapper.withTransactionId(seqnumField);
 
         List<String> columnFamilies = new ArrayList<>();
         columnFamilies.add(columnFamily);
