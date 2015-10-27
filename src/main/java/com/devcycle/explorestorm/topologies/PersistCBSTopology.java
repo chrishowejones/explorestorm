@@ -189,6 +189,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
         TridentHBaseMapper tridentHBaseMapper = new AccountTransactionMapper()
                 .withRowKeyField(ROW_KEY_FIELD)
                 .withColumnFamilies(columnFamilies)
+                .withTransactionId(ParseCBSMessage.FIELD_SEQNUM)
                 .withColumnFieldPrefixes(STATEMENT_DATA_CF, fieldsToPersist);
         HBaseState.Options options = new HBaseState.Options()
                 .withConfigKey(HBASE_CONFIG.toString())
