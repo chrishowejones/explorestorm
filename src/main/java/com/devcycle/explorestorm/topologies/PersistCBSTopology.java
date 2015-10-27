@@ -9,11 +9,13 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
+import com.devcycle.explorestorm.function.CreateRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.function.PrintFunction;
+import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
-import org.apache.storm.hbase.trident.mapper.SimpleTridentHBaseMapper;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
 import org.apache.storm.hbase.trident.state.HBaseState;
 import org.apache.storm.hbase.trident.state.HBaseStateFactory;
@@ -26,7 +28,9 @@ import storm.kafka.trident.TridentKafkaConfig;
 import storm.trident.TridentTopology;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
@@ -51,6 +55,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
     private static final String STATEMENT_DATA_CF = "statement_data";
     private static final String MESSAGE_CF = "message_data";
     private static final String ROW_KEY_FIELD = "account-txn-date";
+    private static final String TABLE_NAME = "account-txns";
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
     private OpaqueTridentKafkaSpout kafkaSpout;
@@ -138,10 +143,29 @@ public class PersistCBSTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
         HBaseStateFactory cbsHBaseStateFactory = buildCBSHBaseStateFactory(ParseCBSMessage.getEmittedFields());
 
+        Fields transformedFields = new Fields(
+                ParseCBSMessage.FIELD_SEQNUM,
+                ParseCBSMessage.FIELD_T_IPTETIME,
+                ParseCBSMessage.FIELD_T_IPPBR,
+                ParseCBSMessage.FIELD_T_IPPSTEM,
+                ParseCBSMessage.FIELD_T_IPTTST,
+                ParseCBSMessage.FIELD_T_IPTCLCDE,
+                ParseCBSMessage.FIELD_T_IPTAM,
+                ParseCBSMessage.FIELD_T_IPCURCDE,
+                ParseCBSMessage.FIELD_T_HIACBL,
+                ParseCBSMessage.FIELD_T_IPCDATE,
+                ParseCBSMessage.FIELD_T_IPTD,
+                ParseCBSMessage.FIELD_T_IPTXNARR,
+                ParseCBSMessage.FIELD_FULL_MESSAGE,
+                ROW_KEY_FIELD
+        );
+
+
         topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
-                .each(ParseCBSMessage.getEmittedFields(), new PrintFunction(), new Fields());
+                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD))
+                .each(transformedFields, new PrintFunction(), new Fields());
         return topology;
     }
 
@@ -152,12 +176,21 @@ public class PersistCBSTopology extends BaseExploreTopology {
      * @return HBaseStateFactory
      */
     HBaseStateFactory buildCBSHBaseStateFactory(Fields fieldsInStream) {
-        TridentHBaseMapper tridentHBaseMapper = new SimpleTridentHBaseMapper()
-                .withColumnFamily(STATEMENT_DATA_CF)
-                .withColumnFields(fieldsInStream)
-                .withRowKeyField(ROW_KEY_FIELD);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(STATEMENT_DATA_CF);
+
+        List<String> columnFieldPrefixes = new ArrayList<>();
+        columnFieldPrefixes.add(ParseCBSMessage.FIELD_T_IPTETIME);
+
+        TridentHBaseMapper tridentHBaseMapper = new AccountTransactionMapper()
+                .withRowKeyField(ROW_KEY_FIELD)
+                .withColumnFamilies(columnFamilies)
+                .withColumnFieldPrefixes(STATEMENT_DATA_CF, columnFieldPrefixes);
         HBaseState.Options options = new HBaseState.Options()
-                .withConfigKey(HBASE_CONFIG.toString());
+                .withConfigKey(HBASE_CONFIG.toString())
+                .withDurability(Durability.SYNC_WAL)
+                .withMapper(tridentHBaseMapper)
+                .withTableName(TABLE_NAME);;
         HBaseStateFactory factory = new HBaseStateFactory(options);
         return factory;
     }

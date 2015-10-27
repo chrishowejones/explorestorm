@@ -61,8 +61,10 @@ public class AccountTransactionMapperTest {
     public void testWithColumnFamiliesOneFamily() {
         AccountTransactionMapper mapper = new AccountTransactionMapper();
         String columnFamily = "cf";
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add(columnFamily);
 
-        final AccountTransactionMapper accountTransactionMapper = mapper.withColumnFamilies(columnFamily);
+        final AccountTransactionMapper accountTransactionMapper = mapper.withColumnFamilies(columnFamilies);
         assertThat(accountTransactionMapper, notNullValue());
         assertThat(accountTransactionMapper, instanceOf(AccountTransactionMapper.class));
         assertThat(accountTransactionMapper.getColumnFamilies(), hasSize(1));
@@ -76,10 +78,12 @@ public class AccountTransactionMapperTest {
         String columnFamily2 = "cf2";
         String columnFamily3 = "cf3";
 
-        AccountTransactionMapper accountTransactionMapper = mapper.withColumnFamilies(columnFamily);
-        mapper.withColumnFamilies(columnFamily2);
-        mapper.withColumnFamilies(columnFamily3);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+        columnFamilies.add(columnFamily2);
+        columnFamilies.add(columnFamily3);
 
+        AccountTransactionMapper accountTransactionMapper = mapper.withColumnFamilies(columnFamilies);
 
         assertThat(accountTransactionMapper, notNullValue());
         assertThat(accountTransactionMapper, instanceOf(AccountTransactionMapper.class));
@@ -97,7 +101,10 @@ public class AccountTransactionMapperTest {
         final String seqnum = "seqnum";
         columnFieldPrefixes.add(seqnum);
 
-        mapper.withColumnFamilies(columnFamily);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+
+        mapper.withColumnFamilies(columnFamilies);
 
         AccountTransactionMapper accountTransactionMapper = mapper.withColumnFieldPrefixes(columnFamily, columnFieldPrefixes);
 
@@ -117,7 +124,9 @@ public class AccountTransactionMapperTest {
         columnFieldPrefixes.add(seqnum);
         columnFieldPrefixes.add(txndate);
 
-        mapper.withColumnFamilies(columnFamily);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+        mapper.withColumnFamilies(columnFamilies);
 
         AccountTransactionMapper accountTransactionMapper = mapper.withColumnFieldPrefixes(columnFamily, columnFieldPrefixes);
 
@@ -144,8 +153,11 @@ public class AccountTransactionMapperTest {
         final String fullMessage = "fullmessage";
         columnFieldPrefixesCF2.add(fullMessage);
 
-        mapper.withColumnFamilies(columnFamily);
-        mapper.withColumnFamilies(columnFamily2);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+        columnFamilies.add(columnFamily2);
+
+        mapper.withColumnFamilies(columnFamilies);
 
         AccountTransactionMapper accountTransactionMapper = mapper.withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
         mapper.withColumnFieldPrefixes(columnFamily2, columnFieldPrefixesCF2);
@@ -187,7 +199,10 @@ public class AccountTransactionMapperTest {
         columnFieldPrefixesCF1.add(accNumField);
         mapper.withRowKeyField(seqnumField);
 
-        mapper.withColumnFamilies(columnFamily).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+
+        mapper.withColumnFamilies(columnFamilies).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum
         int seqnum = 123;
@@ -224,7 +239,10 @@ public class AccountTransactionMapperTest {
         columnFieldPrefixesCF1.add(txnDate);
         mapper.withRowKeyField(seqnumField);
 
-        mapper.withColumnFamilies(columnFamily).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+
+        mapper.withColumnFamilies(columnFamilies).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum
         int seqnum = 123;
@@ -273,8 +291,12 @@ public class AccountTransactionMapperTest {
         columnFieldPrefixesCF2.add(fullmsg);
         mapper.withRowKeyField(seqnumField);
 
-        mapper.withColumnFamilies(columnFamily).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
-        mapper.withColumnFamilies(columnFamily2).withColumnFieldPrefixes(columnFamily2, columnFieldPrefixesCF2);
+        List<String> columnFamilies = new ArrayList<>();
+        columnFamilies.add(columnFamily);
+        columnFamilies.add(columnFamily2);
+
+        mapper.withColumnFamilies(columnFamilies).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
+        mapper.withColumnFieldPrefixes(columnFamily2, columnFieldPrefixesCF2);
 
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum

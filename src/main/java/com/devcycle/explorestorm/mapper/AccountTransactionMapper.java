@@ -34,11 +34,11 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
     /**
      * Specify the ColumnFamily names
      *
-     * @param columnFamily name of column family
+     * @param columnFamilies list of names of column family
      * @return this
      */
-    public AccountTransactionMapper withColumnFamilies(String columnFamily) {
-        columnFamilies.add(columnFamily);
+    public AccountTransactionMapper withColumnFamilies(List<String> columnFamilies) {
+        this.columnFamilies = columnFamilies;
         return this;
     }
 
