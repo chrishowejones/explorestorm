@@ -23,19 +23,19 @@ import java.util.Map;
  */
 public class ParseCBSMessage extends BaseFunction {
 
-    public static final String FIELD_SEQNUM = "SEQNUM";
-    public static final String FIELD_T_IPTETIME = "tIPTETIME";
-    public static final String FIELD_T_IPPBR = "tIPPBR";
-    public static final String FIELD_T_IPPSTEM = "tIPPSTEM";
-    public static final String FIELD_T_IPTTST = "tIPTTST";
-    public static final String FIELD_T_IPTCLCDE = "tIPTCLCDE";
-    public static final String FIELD_T_IPTAM = "tIPTAM";
-    public static final String FIELD_T_IPCURCDE = "tIPCURCDE";
-    public static final String FIELD_T_HIACBL = "tHIACBL";
-    public static final String FIELD_T_IPCDATE = "tIPCDATE";
-    public static final String FIELD_T_IPTD = "tIPTD";
-    public static final String FIELD_T_IPTXNARR = "tIPTXNARR";
-    public static final String FIELD_FULL_MESSAGE = "fullMessage";
+    public static final String FIELD_SEQNUM = "SEQNUM"; // Sequence number
+    public static final String FIELD_T_IPTETIME = "tIPTETIME"; // TE Time HHMMSS
+    public static final String FIELD_T_IPPBR = "tIPPBR"; // parent branch code
+    public static final String FIELD_T_IPPSTEM = "tIPPSTEM"; // parent stem
+    public static final String FIELD_T_IPTTST = "tIPTTST"; // txn type/subtype
+    public static final String FIELD_T_IPTCLCDE = "tIPTCLCDE"; // txn class/code
+    public static final String FIELD_T_IPTAM = "tIPTAM"; // transaction amount
+    public static final String FIELD_T_IPCURCDE = "tIPCURCDE"; // currency code
+    public static final String FIELD_T_HIACBL = "tHIACBL"; // account balance
+    public static final String FIELD_T_IPCDATE = "tIPCDATE"; // current date
+    public static final String FIELD_T_IPTD = "tIPTD"; // transaction date
+    public static final String FIELD_T_IPTXNARR = "tIPTXNARR"; // narrative
+    public static final String FIELD_FULL_MESSAGE = "fullMessage"; // full message
 
 
     private static final Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);

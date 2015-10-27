@@ -3,8 +3,10 @@ package com.devcycle.explorestorm.topologies;
 import backtype.storm.Config;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
+import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
+import org.apache.storm.hbase.trident.state.HBaseStateFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -69,6 +71,15 @@ public class PersistCBSTopologyTest {
         assertThat(stormTopology, notNullValue());
         assertThat(stormTopology.get_spouts(), notNullValue());
         assertThat(stormTopology.get_spouts().size(), is(1));
+        assertThat(stormTopology.get_bolts().size(), is(3));
+        assertThat(stormTopology.get_state_spouts_size(), is(0));
+    }
+
+    @Test
+    public void testBuildHBaseStateFactory() {
+        PersistCBSTopology topology = new PersistCBSTopology(mockConfigProperties);
+        HBaseStateFactory factory = topology.buildCBSHBaseStateFactory(ParseCBSMessage.getEmittedFields());
+        assertThat(factory, notNullValue());
     }
 
     private void givenCbsKafkaSpout() {

@@ -8,18 +8,18 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
-import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.function.ExploreTransformMessage;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
-import com.devcycle.explorestorm.util.StormRunner;
+import org.apache.storm.hbase.trident.mapper.SimpleTridentHBaseMapper;
+import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
+import org.apache.storm.hbase.trident.state.HBaseState;
+import org.apache.storm.hbase.trident.state.HBaseStateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storm.kafka.BrokerHosts;
-import storm.kafka.KafkaSpout;
 import storm.kafka.ZkHosts;
 import storm.kafka.trident.OpaqueTridentKafkaSpout;
 import storm.kafka.trident.TridentKafkaConfig;
@@ -42,12 +42,15 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
 
     public static final String STREAM_NAME = "CbsHBaseStream";
-    public static final String EXPLORE_TOPOLOGY_PROPERTIES = "explore_topology.properties";
+    public static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistCBSTopology.class);
     private static final java.lang.String KAFKA_TOPIC = "CBSTopic";
     private static final String TRIDENT_KAFKA_SPOUT = "CBSMessageSpout";
     private static final String TOPOLOGY_NAME = "persistCBSTopology";
+    private static final String STATEMENT_DATA_CF = "statement_data";
+    private static final String MESSAGE_CF = "message_data";
+    private static final String ROW_KEY_FIELD = "account-txn-date";
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
     private OpaqueTridentKafkaSpout kafkaSpout;
@@ -62,6 +65,11 @@ public class PersistCBSTopology extends BaseExploreTopology {
         super(configFileLocation);
     }
 
+    /**
+     * Create PersistCBSTopology
+     *
+     * @param configProperties properties file to configure this topology.
+     */
     public PersistCBSTopology(Properties configProperties) {
         super(configProperties);
     }
@@ -86,12 +94,22 @@ public class PersistCBSTopology extends BaseExploreTopology {
         persistCBSTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
 
+    /**
+     * Returns the CBSKafka Scheme.
+     *
+     * @return Scheme for CBS Kafka messages.
+     */
     public Scheme getCBSKafkaScheme() {
         if (cbsKafkaScheme == null)
             cbsKafkaScheme = new CBSKafkaScheme();
         return cbsKafkaScheme;
     }
 
+    /**
+     * Construct and return the config for this topology.
+     *
+     * @return config for this topology.
+     */
     @Override
     protected Config buildConfig() {
         final Config config = new Config();
@@ -100,34 +118,84 @@ public class PersistCBSTopology extends BaseExploreTopology {
         return config;
     }
 
+    /**
+     * Build the topology for a Trident Stream that consumes a CBS message from Kafka and persists it in HBase keyed by account/txn-date
+     * @return
+     */
     @Override
     protected StormTopology buildTopology() {
+        return buildTridentTopology().build();
+    }
+
+    /**
+     * Build Trident Topology for a Trident Stream that consumes a CBS message from Kafka and persists it in HBase keyed by account/txn-date
+     * @return
+     */
+    TridentTopology buildTridentTopology() {
         TridentTopology topology = new TridentTopology();
         Scheme cbsKafkaScheme = getCBSKafkaScheme();
 
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
+        HBaseStateFactory cbsHBaseStateFactory = buildCBSHBaseStateFactory(ParseCBSMessage.getEmittedFields());
 
         topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
                 .each(ParseCBSMessage.getEmittedFields(), new PrintFunction(), new Fields());
-        return topology.build();
+        return topology;
     }
 
+    /**
+     * Build CBS HBase State factory for the CBS messages that will be queried by transactions per account per day (Statement queries)
+     *
+     * @param fieldsInStream- fields in stream.
+     * @return HBaseStateFactory
+     */
+    HBaseStateFactory buildCBSHBaseStateFactory(Fields fieldsInStream) {
+        TridentHBaseMapper tridentHBaseMapper = new SimpleTridentHBaseMapper()
+                .withColumnFamily(STATEMENT_DATA_CF)
+                .withColumnFields(fieldsInStream)
+                .withRowKeyField(ROW_KEY_FIELD);
+        HBaseState.Options options = new HBaseState.Options()
+                .withConfigKey(HBASE_CONFIG.toString());
+        HBaseStateFactory factory = new HBaseStateFactory(options);
+        return factory;
+    }
+
+    /**
+     * Get the HBaseConfigBuilder.
+     *
+     * @return HBaseConfigBuilder
+     */
     HBaseConfigBuilder getHBaseConfigBuilder() {
         if (hbaseConfigBuilder == null)
             this.hbaseConfigBuilder = new HBaseConfigBuilder();
         return hbaseConfigBuilder;
     }
 
+    /**
+     * Set HBaseConfigBuilder to be used for dependency injection and testing.
+     *
+     * @param hbaseConfigBuilder
+     */
     void setHBaseConfigBuilder(HBaseConfigBuilder hbaseConfigBuilder) {
         this.hbaseConfigBuilder = hbaseConfigBuilder;
     }
 
+    /**
+     * Set CBSKafkaScheme to be used for dependency injection and testing.
+     *
+     * @param cbsKafkaScheme
+     */
     void setCbsKafkaScheme(CBSKafkaScheme cbsKafkaScheme) {
         this.cbsKafkaScheme = cbsKafkaScheme;
     }
 
+    /**
+     * Set Kafka Spout used for testing.
+     *
+     * @param spout
+     */
     void setKafkaSpout(OpaqueTridentKafkaSpout spout) {
         this.kafkaSpout = spout;
     }
