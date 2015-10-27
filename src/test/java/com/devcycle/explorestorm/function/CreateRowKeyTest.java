@@ -22,14 +22,15 @@ public class CreateRowKeyTest {
     public void testExecute() {
         CreateRowKey transform = new CreateRowKey();
         TridentTuple tuple = mock(TridentTuple.class);
-        Mockito.when(tuple.getIntegerByField(ParseCBSMessage.FIELD_SEQNUM)).thenReturn(123);
+        Mockito.when(tuple.getIntegerByField(ParseCBSMessage.FIELD_T_IPPBR)).thenReturn(123);
+        Mockito.when(tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM)).thenReturn(987654321L);
         Mockito.when(tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD)).thenReturn("2015-10-27");
         TridentCollector collector = mock(TridentCollector.class);
         transform.execute(tuple, collector);
 
         // assert collector in correct state
         verify(collector).emit(any(List.class));
-        String expectedKey = "123-2015-10-27";
+        String expectedKey = "123987654321-2015-10-27";
         Values expectedValues = new Values(expectedKey);
         verify(collector).emit(expectedValues);
     }

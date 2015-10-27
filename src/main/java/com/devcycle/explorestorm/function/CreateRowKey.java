@@ -12,16 +12,17 @@ public class CreateRowKey extends BaseFunction {
 
     /**
      * Transform the CBS message to create a rowKey for HBase that is composite key of
-     * the sequence number and the transaction date.
+     * the sortcode, account number and the transaction date.
      *
      * @param tuple
      * @param collector
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        Integer sequenceNumber = tuple.getIntegerByField(ParseCBSMessage.FIELD_SEQNUM);
+        Integer sortCode = tuple.getIntegerByField(ParseCBSMessage.FIELD_T_IPPBR);
+        Long accountNumber = tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM);
         String transactionDate = tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD);
-        String rowKey = sequenceNumber + "-" + transactionDate;
+        String rowKey = Integer.toString(sortCode) + Long.toString(accountNumber) + "-" + transactionDate;
         collector.emit(new Values(rowKey));
     }
 }
