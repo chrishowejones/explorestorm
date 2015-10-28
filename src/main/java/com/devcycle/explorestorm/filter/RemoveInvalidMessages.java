@@ -1,6 +1,5 @@
 package com.devcycle.explorestorm.filter;
 
-import com.devcycle.explorestorm.function.ParseCBSMessage;
 import storm.trident.operation.Filter;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
@@ -45,7 +44,7 @@ public class RemoveInvalidMessages implements Filter {
 
     private boolean isValid(TridentTuple tuple) {
         boolean valid = true;
-        valid = hasFields(tuple) && hasKeyFields(tuple) && hasTransactionId(tuple);
+        valid = hasFieldsAndValues(tuple) && hasTransactionId(tuple) && hasKeyFields(tuple);
         return valid;
     }
 
@@ -61,8 +60,9 @@ public class RemoveInvalidMessages implements Filter {
         return true;
     }
 
-    private boolean hasFields(TridentTuple tuple) {
-        return tuple.getFields() != null && tuple.getFields().size() > 0 && !tuple.isEmpty();
+    private boolean hasFieldsAndValues(TridentTuple tuple) {
+        return tuple.getFields() != null && tuple.getFields().size() > 0 && !tuple.isEmpty()
+                && tuple.size() > 0;
     }
 
     private boolean validTuple(TridentTuple tuple) {

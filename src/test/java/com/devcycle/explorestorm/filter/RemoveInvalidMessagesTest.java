@@ -32,6 +32,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(true));
@@ -45,6 +46,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(txnid)).thenReturn(123);
         when(tuple.getValueByField(keyfield)).thenReturn(556677);
+        when(tuple.size()).thenReturn(2);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield });
         assertThat(filter.isKeep(tuple), is(true));
@@ -59,6 +61,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.isEmpty()).thenReturn(true);
         when(tuple.getValueByField(txnid)).thenReturn(123);
         when(tuple.getValueByField(keyfield)).thenReturn(556677);
+        when(tuple.size()).thenReturn(2);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield });
         assertThat(filter.isKeep(tuple), is(false));
@@ -75,6 +78,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -92,6 +96,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -108,6 +113,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(seqnum)).thenReturn(123);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -125,6 +131,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(null);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -141,6 +148,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(seqnum)).thenReturn(123);
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -158,6 +166,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(null);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -174,6 +183,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(seqnum)).thenReturn(123);
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -191,6 +201,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn(null);
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -208,6 +219,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -226,6 +238,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
+        when(tuple.size()).thenReturn(4);
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { tIPPBR, tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
@@ -243,6 +256,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField("tIPPBR")).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
+        when(tuple.size()).thenReturn(4);
 
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, tIPPSTEM });
@@ -262,6 +276,7 @@ public class RemoveInvalidMessagesTest {
         when(tuple.getValueByField("tIPPBR")).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
+        when(tuple.size()).thenReturn(4);
 
 
         RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, tIPPSTEM });
