@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class MessageTuple {
 
-    private boolean empty = false;
+    private boolean empty = true;
     private Logger LOG = LoggerFactory.getLogger(MessageTuple.class);
     private Fields fields;
     private Values values;
@@ -38,14 +38,14 @@ public class MessageTuple {
 
     private void loadKeyValues(Map<String, Object> fieldValueMap) {
         fields = buildFields(fieldValueMap);
-        if (!empty && fieldValueMap.values().size() > 0) {
+        if (fieldValueMap!= null && !empty && fieldValueMap.values().size() > 0) {
             values = new Values();
             values.addAll(fieldValueMap.values());
         }
     }
 
     private Fields buildFields(Map<String, Object> fieldValueMap) {
-        if (fieldValueMap == null)
+        if (fieldValueMap == null || empty)
             return null;
         return new Fields(new ArrayList(fieldValueMap.keySet()));
     }

@@ -73,15 +73,15 @@ public class MessageTupleTest {
     @Test
     public void ReturnsEmptyValuesIfNullMapConstructor() {
         MessageTuple tuple = new MessageTuple(null);
-        assertThat(tuple.getFields().size(), is(0));
-        assertThat(tuple.getValues().size(), is(0));
+        assertThat(tuple.getFields(), nullValue());
+        assertThat(tuple.getValues(), nullValue());
      }
 
     @Test
     public void ReturnsEmptyValuesIfEmptyMapConstructor() {
         MessageTuple tuple = new MessageTuple(new HashMap<String, Object>());
-        assertThat(tuple.getFields().size(), is(0));
-        assertThat(tuple.getValues().size(), is(0));
+        assertThat(tuple.getFields(), nullValue());
+        assertThat(tuple.getValues(), nullValue());
     }
 
 }
