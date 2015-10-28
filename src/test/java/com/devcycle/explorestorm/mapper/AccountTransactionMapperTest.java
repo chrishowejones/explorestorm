@@ -221,7 +221,7 @@ public class AccountTransactionMapperTest {
         // set account num
         when(tuple.getValueByField(accNumField)).thenReturn(accNumValue);
 
-        String expectedAccNumCol = accNumField + ":" + seqnum;
+        String expectedAccNumCol = accNumField + "-" + seqnum;
 
         assertThat(mapper.columns(tuple), notNullValue());
         assertThat(mapper.columns(tuple).hasColumns(), is(true));
@@ -262,8 +262,8 @@ public class AccountTransactionMapperTest {
         when(tuple.getValueByField(accNumField)).thenReturn(accNumValue);
         when(tuple.getValueByField(txnDate)).thenReturn(txnDateValue);
 
-        String expectedAccNumCol = accNumField + ":" + seqnum;
-        String expectedTxnDateCol = txnDate + ":" + seqnum;
+        String expectedAccNumCol = accNumField + "-" + seqnum;
+        String expectedTxnDateCol = txnDate + "-" + seqnum;
 
         assertThat(mapper.columns(tuple), notNullValue());
         assertThat(mapper.columns(tuple).hasColumns(), is(true));
@@ -320,9 +320,9 @@ public class AccountTransactionMapperTest {
         when(tuple.getValueByField(fullmsg)).thenReturn(fullMessageValue);
 
 
-        String expectedAccNumCol = accNumField + ":" + seqnum;
-        String expectedTxnDateCol = txnDate + ":" + seqnum;
-        String expectedFullMsg = fullmsg + ":" + seqnum;
+        String expectedAccNumCol = accNumField + "-" + seqnum;
+        String expectedTxnDateCol = txnDate + "-" + seqnum;
+        String expectedFullMsg = fullmsg + "-" + seqnum;
 
         assertThat(mapper.columns(tuple), notNullValue());
         assertThat(mapper.columns(tuple).hasColumns(), is(true));

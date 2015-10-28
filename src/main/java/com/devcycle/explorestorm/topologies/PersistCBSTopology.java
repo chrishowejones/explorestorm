@@ -168,11 +168,27 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 ROW_KEY_FIELD
         );
 
-        List<String> fieldsToPersist = new ArrayList<>();
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
+        List<String> fieldsToPersist = getFieldsToPersistForAccountTxn();
+
+
         HBaseStateFactory factory = buildCBSHBaseStateFactory(fieldsToPersist);
         stream.partitionPersist(factory, transformedFields, new HBaseUpdater());
         return topology;
+    }
+
+    private List<String> getFieldsToPersistForAccountTxn() {
+        List<String> fieldsToPersist = new ArrayList<>();
+        fieldsToPersist.add(ParseCBSMessage.FIELD_SEQNUM);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTTST);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTCLCDE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTAM);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCURCDE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_HIACBL);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCDATE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTD);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTXNARR);
+        return fieldsToPersist;
     }
 
     /**
@@ -184,13 +200,19 @@ public class PersistCBSTopology extends BaseExploreTopology {
     HBaseStateFactory buildCBSHBaseStateFactory(List<String> fieldsToPersist) {
         List<String> columnFamilies = new ArrayList<>();
         columnFamilies.add(STATEMENT_DATA_CF);
+        columnFamilies.add(MESSAGE_CF);
 
+
+        List<String> messageFields = new ArrayList<>();
+        messageFields.add(ParseCBSMessage.FIELD_FULL_MESSAGE);
 
         TridentHBaseMapper tridentHBaseMapper = new AccountTransactionMapper()
                 .withRowKeyField(ROW_KEY_FIELD)
                 .withColumnFamilies(columnFamilies)
                 .withTransactionId(ParseCBSMessage.FIELD_SEQNUM)
-                .withColumnFieldPrefixes(STATEMENT_DATA_CF, fieldsToPersist);
+                .withColumnFieldPrefixes(STATEMENT_DATA_CF, fieldsToPersist)
+                .withColumnFieldPrefixes(MESSAGE_CF, messageFields);
+
         HBaseState.Options options = new HBaseState.Options()
                 .withConfigKey(HBASE_CONFIG.toString())
                 .withDurability(Durability.SYNC_WAL)
