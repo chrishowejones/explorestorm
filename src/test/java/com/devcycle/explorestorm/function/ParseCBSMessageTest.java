@@ -404,10 +404,7 @@ public class ParseCBSMessageTest {
 
         parseMessage.execute(tuple, collector);
 
-        ArgumentCaptor<Values> values = ArgumentCaptor.forClass(Values.class);
-        verify(collector).emit(values.capture());
-        assertThat(values, notNullValue());
-        assertThat(values.getAllValues(), notNullValue());
+        verify(collector).emit(null);
     }
 
 

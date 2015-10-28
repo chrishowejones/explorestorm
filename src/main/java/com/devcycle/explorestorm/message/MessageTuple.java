@@ -27,25 +27,26 @@ public class MessageTuple {
      */
     public MessageTuple(Map<String, Object> fieldValueMap) {
         LOG.trace("Created MessageTuple from map");
-        isMapEmpty(fieldValueMap);
+        setIsMapEmpty(fieldValueMap);
         loadKeyValues(fieldValueMap);
     }
 
-    private void isMapEmpty(Map<String, Object> fieldValueMap) {
+    private void setIsMapEmpty(Map<String, Object> fieldValueMap) {
         if (fieldValueMap != null)
             empty = fieldValueMap.isEmpty();
     }
 
     private void loadKeyValues(Map<String, Object> fieldValueMap) {
         fields = buildFields(fieldValueMap);
-        values = new Values();
-        if (fieldValueMap != null && !fieldValueMap.isEmpty())
+        if (!empty && fieldValueMap.values().size() > 0) {
+            values = new Values();
             values.addAll(fieldValueMap.values());
+        }
     }
 
     private Fields buildFields(Map<String, Object> fieldValueMap) {
         if (fieldValueMap == null)
-            return new Fields();
+            return null;
         return new Fields(new ArrayList(fieldValueMap.keySet()));
     }
 
