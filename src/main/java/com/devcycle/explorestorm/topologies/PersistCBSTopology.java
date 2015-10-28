@@ -147,7 +147,9 @@ public class PersistCBSTopology extends BaseExploreTopology {
         // Create trident stream to read, parse and transform CBS message ready for persisting
         final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
-                .each(ParseCBSMessage.getEmittedFields(), new RemoveInvalidMessages())
+                .each(ParseCBSMessage.getEmittedFields(),
+                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
+                                new String[] { ParseCBSMessage.FIELD_T_IPPBR, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
                 .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
