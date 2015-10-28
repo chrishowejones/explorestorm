@@ -145,36 +145,42 @@ public class PersistCBSTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
         // Create trident stream to read, parse and transform CBS message ready for persisting
-        final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
-                .each(ParseCBSMessage.getEmittedFields(),
-                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
-                                new String[] { ParseCBSMessage.FIELD_T_IPPBR, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
-                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
+        Fields outputFromParseCBS = new Fields(
+                CBSKafkaScheme.FIELD_JSON_MESSAGE
 
-        // set up HBase state factory
-        Fields transformedFields = new Fields(
-                ParseCBSMessage.FIELD_SEQNUM,
-                ParseCBSMessage.FIELD_T_IPTETIME,
-                ParseCBSMessage.FIELD_T_IPPBR,
-                ParseCBSMessage.FIELD_T_IPPSTEM,
-                ParseCBSMessage.FIELD_T_IPTTST,
-                ParseCBSMessage.FIELD_T_IPTCLCDE,
-                ParseCBSMessage.FIELD_T_IPTAM,
-                ParseCBSMessage.FIELD_T_IPCURCDE,
-                ParseCBSMessage.FIELD_T_HIACBL,
-                ParseCBSMessage.FIELD_T_IPCDATE,
-                ParseCBSMessage.FIELD_T_IPTD,
-                ParseCBSMessage.FIELD_T_IPTXNARR,
-                ParseCBSMessage.FIELD_FULL_MESSAGE,
-                ROW_KEY_FIELD
         );
 
-        List<String> fieldsToPersist = getFieldsToPersistForAccountTxn();
+        final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
+                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
+                .each(outputFromParseCBS, new PrintFunction(), new Fields());
+//                .each(ParseCBSMessage.getEmittedFields(),
+//                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
+//                                new String[]{ParseCBSMessage.FIELD_T_IPPBR, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
+//                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
 
-
-        HBaseStateFactory factory = buildCBSHBaseStateFactory(fieldsToPersist);
-        stream.partitionPersist(factory, transformedFields, new HBaseUpdater());
+        // set up HBase state factory
+//        Fields transformedFields = new Fields(
+//                ParseCBSMessage.FIELD_SEQNUM,
+//                ParseCBSMessage.FIELD_T_IPTETIME,
+//                ParseCBSMessage.FIELD_T_IPPBR,
+//                ParseCBSMessage.FIELD_T_IPPSTEM,
+//                ParseCBSMessage.FIELD_T_IPTTST,
+//                ParseCBSMessage.FIELD_T_IPTCLCDE,
+//                ParseCBSMessage.FIELD_T_IPTAM,
+//                ParseCBSMessage.FIELD_T_IPCURCDE,
+//                ParseCBSMessage.FIELD_T_HIACBL,
+//                ParseCBSMessage.FIELD_T_IPCDATE,
+//                ParseCBSMessage.FIELD_T_IPTD,
+//                ParseCBSMessage.FIELD_T_IPTXNARR,
+//                ParseCBSMessage.FIELD_FULL_MESSAGE,
+//                ROW_KEY_FIELD
+//        );
+//
+//        List<String> fieldsToPersist = getFieldsToPersistForAccountTxn();
+//
+//
+//        HBaseStateFactory factory = buildCBSHBaseStateFactory(fieldsToPersist);
+//        stream.partitionPersist(factory, transformedFields, new HBaseUpdater());
         return topology;
     }
 

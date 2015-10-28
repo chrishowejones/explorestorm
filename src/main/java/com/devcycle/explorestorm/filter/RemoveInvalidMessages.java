@@ -61,7 +61,7 @@ public class RemoveInvalidMessages implements Filter {
 
     private boolean hasFieldsAndValues(TridentTuple tuple) {
         return tuple.getFields() != null && tuple.getFields().size() > 0 && !tuple.isEmpty()
-                && tuple.size() > 0;
+                && tuple.size() > 1 && tuple.getValues() != null && tuple.getValues().size() > 1;
     }
 
     private boolean validTuple(TridentTuple tuple) {

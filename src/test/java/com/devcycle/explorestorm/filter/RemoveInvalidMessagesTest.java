@@ -1,11 +1,15 @@
 package com.devcycle.explorestorm.filter;
 
 import backtype.storm.tuple.Fields;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import storm.trident.tuple.TridentTuple;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -19,6 +23,14 @@ public class RemoveInvalidMessagesTest {
 
     @Mock
     private TridentTuple tuple;
+
+    @Before
+    public void setUp() {
+        List<Object> dummyValues = new ArrayList<>();
+        dummyValues.add("dummy1");
+        dummyValues.add("dummy2");
+        when(tuple.getValues()).thenReturn(dummyValues);
+    }
 
     @Test
     public void testValidMessage() {
