@@ -51,6 +51,20 @@ public class RemoveInvalidMessagesTest {
     }
 
     @Test
+    public void testEmptyTuple() {
+        final String txnid = "txnident";
+        final String keyfield = "key field";
+        Fields fields = new Fields( txnid, keyfield);
+        when(tuple.getFields()).thenReturn(fields);
+        when(tuple.isEmpty()).thenReturn(true);
+        when(tuple.getValueByField(txnid)).thenReturn(123);
+        when(tuple.getValueByField(keyfield)).thenReturn(556677);
+
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield });
+        assertThat(filter.isKeep(tuple), is(false));
+    }
+
+    @Test
     public void testInvalidMessageNoSeqNum() {
         final String seqnum = "SEQNUM";
         final String tIPPBR = "tIPPBR";
