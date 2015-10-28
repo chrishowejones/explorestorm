@@ -44,7 +44,11 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
     }
 
     /**
-     * Specify the columnFieldPrefixes for the given column family.
+     * Specify the columnFieldPrefixes for the given column family. These are the field names in the input tuple that will be used to
+     * extract the values and to build the prefix of the column name in the HBase table.
+     *
+     * The full column name will be a concaternation of the field prefix and the transaction id value from the tuple.
+     * E.g. for transaction 999 and field tIPTD, the column name will be tIPTD-999
      *
      * @param columnFieldPrefixes prefixes for column field names.
      * @return this
@@ -85,36 +89,47 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
     public ColumnList columns(TridentTuple tridentTuple) {
         ColumnList columns = new ColumnList();
         for (String family : columnFamilies) {
-            for (String fieldPrefix : columnFieldPrefixes.get(family)) {
-                columns.addColumn(family.getBytes(),
-                        buildFieldName(fieldPrefix, tridentTuple.getValueByField(transactionId)),
-                        toBytes(tridentTuple.getValueByField(fieldPrefix)));
-            }
+            addColumnValues(tridentTuple, columns, family);
         }
         return columns;
     }
 
+    /**
+     * Specify the field name of the transaction id that will be used to create a composite column name
+     * for the transaction fields.
+     *
+     * @param transactionId name of the tuple field containing the unique id of the transaction.
+     * @return this
+     */
     public AccountTransactionMapper withTransactionId(String transactionId) {
         this.transactionId = transactionId;
         return this;
     }
 
-
-
-    private byte[] buildFieldName(String fieldPrefix, Object transactionId) {
-        String fieldName = fieldPrefix + "-" + ((Integer)transactionId).toString();
-        return fieldName.getBytes();
-    }
-
+    /**
+     * Return a list of the column field prefixes for the specified column family.
+     *
+     * @param columnFamily
+     * @return list of matching column field prefixes.
+     */
     public List<String> getColumnFieldPrefixes(String columnFamily) {
         return columnFieldPrefixes.get(columnFamily);
     }
 
-
+    /**
+     * Returns a list of the column family names.
+     *
+     * @return column families.
+     */
     List<String> getColumnFamilies() {
         return columnFamilies;
     }
 
+    /**
+     * Returns the tuple field name of the unique identifier of the transaction.
+     *
+     * @return name of transaction id.
+     */
     String getTransactionId() {
         return transactionId;
     }
@@ -126,6 +141,22 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
      */
     String getRowKeyField() {
         return rowKeyField;
+    }
+
+    private void addColumnValues(TridentTuple tridentTuple, ColumnList columns, String family) {
+        for (String fieldPrefix : columnFieldPrefixes.get(family)) {
+            final Object valueByField = tridentTuple.getValueByField(fieldPrefix);
+            if (valueByField != null) {
+                columns.addColumn(family.getBytes(),
+                        buildFieldName(fieldPrefix, tridentTuple.getValueByField(transactionId)),
+                        toBytes(valueByField));
+            }
+        }
+    }
+
+    private byte[] buildFieldName(String fieldPrefix, Object transactionId) {
+        String fieldName = fieldPrefix + "-" + ((Integer) transactionId).toString();
+        return fieldName.getBytes();
     }
 
 }
