@@ -30,7 +30,7 @@ public class CreateRowKeyTest {
 
         // assert collector in correct state
         verify(collector).emit(any(List.class));
-        String expectedKey = "123987654321-2015-10-27";
+        String expectedKey = "987654321-2015-10-27";
         Values expectedValues = new Values(expectedKey);
         verify(collector).emit(expectedValues);
     }

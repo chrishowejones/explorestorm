@@ -19,10 +19,9 @@ public class CreateRowKey extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        Integer sortCode = tuple.getIntegerByField(ParseCBSMessage.FIELD_T_IPPBR);
         Long accountNumber = tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM);
         String transactionDate = tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD);
-        String rowKey = Integer.toString(sortCode) + Long.toString(accountNumber) + "-" + transactionDate;
+        String rowKey = Long.toString(accountNumber) + "-" + transactionDate;
         collector.emit(new Values(rowKey));
     }
 }
