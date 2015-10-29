@@ -60,7 +60,6 @@ public class PersistCBSTopology extends BaseExploreTopology {
     private static final String TABLE_NAME = "account-txns";
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
-    private OpaqueTridentKafkaSpout kafkaSpout;
 
     /**
      * Create PersistCBSTopology.
@@ -183,21 +182,6 @@ public class PersistCBSTopology extends BaseExploreTopology {
         return topology;
     }
 
-    private List<String> getFieldsToPersistForAccountTxn() {
-        List<String> fieldsToPersist = new ArrayList<>();
-        fieldsToPersist.add(ParseCBSMessage.FIELD_SEQNUM);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTTST);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTCLCDE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTAM);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCURCDE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_HIACBL);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCDATE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTD);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTXNARR);
-        return fieldsToPersist;
-    }
-
     /**
      * Build CBS HBase State factory for the CBS messages that will be queried by transactions per account per day (Statement queries)
      *
@@ -258,20 +242,19 @@ public class PersistCBSTopology extends BaseExploreTopology {
         this.cbsKafkaScheme = cbsKafkaScheme;
     }
 
-    /**
-     * Set Kafka Spout used for testing.
-     *
-     * @param spout
-     */
-    void setKafkaSpout(OpaqueTridentKafkaSpout spout) {
-        this.kafkaSpout = spout;
-    }
-
-    private OpaqueTridentKafkaSpout getKafkaSpoutInstance(TridentKafkaConfig spoutConf) {
-        if (kafkaSpout == null) {
-            kafkaSpout = new OpaqueTridentKafkaSpout(spoutConf);
-        }
-        return kafkaSpout;
+    private List<String> getFieldsToPersistForAccountTxn() {
+        List<String> fieldsToPersist = new ArrayList<>();
+        fieldsToPersist.add(ParseCBSMessage.FIELD_SEQNUM);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTTST);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTCLCDE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTAM);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCURCDE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_HIACBL);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCDATE);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTD);
+        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTXNARR);
+        return fieldsToPersist;
     }
 
     private HashMap<String, Object> buildHBaseConfig() {
@@ -283,7 +266,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
         BrokerHosts zk = new ZkHosts(topologyConfig.getProperty(KAFKA_ZOOKEEPER_HOST_PORT.toString()));
         TridentKafkaConfig spoutConf = new TridentKafkaConfig(zk, topologyConfig.getProperty(KAFKA_TOPIC), TRIDENT_KAFKA_SPOUT);
         spoutConf.scheme = new SchemeAsMultiScheme(cbsKafkaScheme);
-        return getKafkaSpoutInstance(spoutConf);
+        return new OpaqueTridentKafkaSpout(spoutConf);
     }
 
 }

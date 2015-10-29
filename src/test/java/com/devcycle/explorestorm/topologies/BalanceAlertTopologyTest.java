@@ -1,6 +1,7 @@
 package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
+import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import storm.trident.TridentTopology;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -30,7 +33,7 @@ public class BalanceAlertTopologyTest {
     @Mock
     private HBaseConfigBuilder mockHBaseConfigBuilder;
     @Mock
-    private CBSKafkaScheme mockCbsKafkaScheme;
+    private Properties mockConfigProperties;
 
 
     @Test
@@ -55,8 +58,16 @@ public class BalanceAlertTopologyTest {
         assertThat(hbaseConfig.get(HBaseConfigBuilder.ZOOKEEPER_ZNODE_PARENT), is((Object) znodeParent));
     }
 
-    private void givenCbsKafkaSpout() {
-        when(mockCbsKafkaScheme.getOutputFields()).thenReturn(new Fields());
+    @Test
+    public void testBuildTopology() throws IOException {
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
+        topology.setCbsKafkaScheme(new CBSKafkaScheme());
+        // assert that topology returned with KafkaSpout configured.
+        final StormTopology stormTopology = topology.buildTopology();
+        assertThat(stormTopology, notNullValue());
+        assertThat(stormTopology.get_spouts(), notNullValue());
+        assertThat(stormTopology.get_spouts().size(), is(1));
+        assertThat(stormTopology.get_bolts().size(), is(3));
     }
 
     private void givenHBaseConfigBuilder() {

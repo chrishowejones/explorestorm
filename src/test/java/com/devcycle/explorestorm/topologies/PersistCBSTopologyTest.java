@@ -34,10 +34,6 @@ public class PersistCBSTopologyTest {
     private HBaseConfigBuilder mockHBaseConfigBuilder;
     @Mock
     private Properties mockConfigProperties;
-    @Mock
-    private CBSKafkaScheme mockCbsKafkaScheme;
-    @Mock
-    private OpaqueTridentKafkaSpout mockSpout;
 
     @Test
     public void testBuildConfig() throws IOException {
@@ -63,9 +59,7 @@ public class PersistCBSTopologyTest {
 
     @Test
     public void testBuildTopology() throws IOException {
-        givenCbsKafkaSpout();
-
-        PersistCBSTopology topology = new PersistCBSTopology(mockConfigProperties);
+        PersistCBSTopology topology = new PersistCBSTopology(new Properties());
         topology.setCbsKafkaScheme(new CBSKafkaScheme());
         // assert that topology returned with KafkaSpout configured.
         final StormTopology stormTopology = topology.buildTopology();
@@ -81,10 +75,6 @@ public class PersistCBSTopologyTest {
         PersistCBSTopology topology = new PersistCBSTopology(mockConfigProperties);
         HBaseStateFactory factory = topology.buildCBSHBaseStateFactory(new ArrayList<String>());
         assertThat(factory, notNullValue());
-    }
-
-    private void givenCbsKafkaSpout() {
-        when(mockCbsKafkaScheme.getOutputFields()).thenReturn(new Fields());
     }
 
     private void givenHBaseConfigBuilder() {

@@ -63,15 +63,15 @@ public class TestJson {
         assertThat(line.length(), is(1240));
         assertThat(line.getInt("SEQNUM"), is(1));
         assertThat(line.getLong("tIPTETIME"), is(153236L));
-        assertThat(line.getInt("tIPPBR"), is(0));
-        assertThat(line.getLong("tIPPSTEM"), is(0L));
+        assertThat(line.getInt("tIPPBR"), is(556111));
+        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
         assertThat(line.getLong("tIPTAM"), is(0L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(165119L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.get("tIPTD"), is(JSONObject.NULL));
+        assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 
@@ -81,15 +81,15 @@ public class TestJson {
         JSONObject line = parseLine(readLine());
         assertThat(line.length(), is(1240));
         assertThat(line.getInt("SEQNUM"), is(2));
-        assertThat(line.getInt("tIPPBR"), is(0));
-        assertThat(line.getLong("tIPPSTEM"), is(0L));
+        assertThat(line.getInt("tIPPBR"), is(556111));
+        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
         assertThat(line.getLong("tIPTAM"), is(0L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(165119L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.get("tIPTD"), is(JSONObject.NULL));
+        assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 
@@ -100,15 +100,15 @@ public class TestJson {
         JSONObject line = parseLine(readLine());
         assertThat(line.length(), is(1241));
         assertThat(line.getInt("SEQNUM"), is(3));
-        assertThat(line.getInt("tIPPBR"), is(0));
-        assertThat(line.getLong("tIPPSTEM"), is(0L));
+        assertThat(line.getInt("tIPPBR"), is(556111));
+        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
         assertThat(line.getLong("tIPTTST"), is(201L));
         assertThat(line.getLong("tIPTCLCDE"), is(65737L));
         assertThat(line.getLong("tIPTAM"), is(0L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(165119L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.get("tIPTD"), is(JSONObject.NULL));
+        assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 
