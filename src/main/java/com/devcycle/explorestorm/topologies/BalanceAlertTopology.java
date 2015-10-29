@@ -8,6 +8,7 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
+import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
@@ -34,6 +35,7 @@ import storm.trident.state.StateFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
@@ -73,7 +75,6 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     public static void main(String[] args) throws IOException, InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
         String configFileLocation = EXPLORE_TOPOLOGY_PROPERTIES;
         boolean runLocally = true;
-        String hbaseRoot;
         BalanceAlertTopology balanceAlertTopology;
         if (args.length >= 1 && args[0].trim().equalsIgnoreCase(REMOTE)) {
             runLocally = false;
@@ -98,9 +99,9 @@ public class BalanceAlertTopology extends BaseExploreTopology {
      *
      * @return scheme
      */
-     Scheme getCBSKafkaScheme() {
-         if (cbsKafkaScheme == null)
-             new CBSKafkaScheme();
+    Scheme getCBSKafkaScheme() {
+        if (cbsKafkaScheme == null)
+            cbsKafkaScheme = new CBSKafkaScheme();
         return cbsKafkaScheme;
     }
 
@@ -153,16 +154,23 @@ public class BalanceAlertTopology extends BaseExploreTopology {
                 .withRowToStormValueMapper(rowToStormValueMapper)
                 .withTableName(TABLE_NAME);
 
+        final List<String> parsedFields = ParseCBSMessage.getEmittedFields().toList();
+        parsedFields.add(0, CBSKafkaScheme.FIELD_JSON_MESSAGE);
+        Fields outputFieldsFromParse = new Fields(parsedFields);
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-            .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields());
+                .each(kafkaSpout.getOutputFields(),
+                        new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
+                .each(ParseCBSMessage.getEmittedFields(),
+                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM, new String[]{ParseCBSMessage.FIELD_T_IPPSTEM}))
+                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new PrintFunction(), new Fields());
 
         StateFactory factory = new HBaseStateFactory(options);
 
-        TridentState state = topology.newStaticState(factory);
+//        TridentState state = topology.newStaticState(factory);
 
-        stream.stateQuery(state, new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new HBaseQuery(), new Fields("columnName", "columnValue"))
-            .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM, "columnName", "columnValue"), new PrintFunction(), new Fields());
+//        stream.stateQuery(state, new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new HBaseQuery(), new Fields("columnName", "columnValue"))
+//            .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM, "columnName", "columnValue"), new PrintFunction(), new Fields());
 
         return topology;
     }
