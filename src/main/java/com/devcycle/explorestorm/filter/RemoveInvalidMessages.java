@@ -1,5 +1,7 @@
 package com.devcycle.explorestorm.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import storm.trident.operation.Filter;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
@@ -11,6 +13,7 @@ import java.util.Map;
  */
 public class RemoveInvalidMessages implements Filter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RemoveInvalidMessages.class);
     private final String transactionIdField;
     private final String[] keyFields;
 
@@ -35,6 +38,7 @@ public class RemoveInvalidMessages implements Filter {
     }
 
     private boolean validMessage(TridentTuple tuple) {
+        LOG.info("Discarded invalid message : " + tuple.get(0));
         return validTuple(tuple) && validFormat(tuple);
     }
 
