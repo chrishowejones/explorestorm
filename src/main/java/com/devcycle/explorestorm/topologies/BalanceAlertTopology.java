@@ -1,6 +1,9 @@
 package com.devcycle.explorestorm.topologies;
 
 import backtype.storm.Config;
+import backtype.storm.generated.AlreadyAliveException;
+import backtype.storm.generated.AuthorizationException;
+import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
@@ -35,6 +38,7 @@ import java.util.Properties;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
 import static com.devcycle.explorestorm.topologies.KafkaConfig.KAFKA_ZOOKEEPER_HOST_PORT;
+import static com.devcycle.explorestorm.util.StormRunner.REMOTE;
 
 /**
  * Created by chris howe-jones on 29/10/15.
@@ -58,6 +62,26 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     public BalanceAlertTopology(Properties configProperties) {
         super(configProperties);
+    }
+
+    /**
+     * Main method that creates and submits this topology to Storm.
+     *
+     * @param args - if the first argument is "remote" then submit this topology to a remote cluster, otherwise run on a local cluster.
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException, InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
+        String configFileLocation = EXPLORE_TOPOLOGY_PROPERTIES;
+        boolean runLocally = true;
+        String hbaseRoot;
+        BalanceAlertTopology balanceAlertTopology;
+        if (args.length >= 1 && args[0].trim().equalsIgnoreCase(REMOTE)) {
+            runLocally = false;
+        }
+        balanceAlertTopology
+                = new BalanceAlertTopology(configFileLocation);
+
+        balanceAlertTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
 
     /**
