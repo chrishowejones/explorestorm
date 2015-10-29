@@ -122,7 +122,7 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap.put(ParseCBSMessage.FIELD_T_IPTXNARR, JSONParser.parseString(jsonObject, ParseCBSMessage.FIELD_T_IPTXNARR));
             fieldsMap.put(ParseCBSMessage.FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
-            LOG.error("Error in JSON: " + jsonMessage, e);
+            LOG.warn("Error in JSON: " + jsonMessage, e);
             fieldsMap = populateNullValues();
         }
         return fieldsMap;
