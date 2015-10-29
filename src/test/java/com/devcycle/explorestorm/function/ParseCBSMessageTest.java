@@ -162,6 +162,11 @@ public class ParseCBSMessageTest {
             "\"tMIIPBFTP\":\"\",\"tMIOPBFTP\":\"\",\"tMIIPSBTP\":\"\",\"tMIOPSBTP\":\"\",\"tMIEDSSTA\":0,\"tMIEDF01\":0,\"tMIEDF02\":0,\"oEDIPBFTP\":\"\"," +
             "\"oEDOPBFTP\":\"\",\"oEDIPSBTP\":\"\",\"oEDOPSBTP\":\"\",\"oEDSTATUS\":0,\"oEDF03\":\"\",\"tMIPCFLAC\":0,\"tMILCONTR\":0,\"tMIOBHSGP\":0,\"tMISPBNCD\":0," +
             "\"tMISPRGCD\":0,\"tMISPRGDX\":0,\"tMILENVTR\":0,\"tMISPDCHC\":0,\"tMIF07\":0,\"tMISPRPDT\":0,\"tMIF03\":0,\"tMIF02\":0,\"tMIF01\":\"\"}";
+
+    private static final String expectedJSON2 = "{\"SEQNUM\":123,\"tIPPBR\":2021,\"tIPTTST\":123,\"tIPPSTEM\":987654321,\"tIPTAM\":10000000000," +
+            "\"tIPTCLCDE\":999,\"tIPCURCDE\":12,\"tHIACBL\":123456789099,\"tIPCDATE\":151013,\"IPTD\":\"2015-10-01\""+
+             "}";
+
     public static final Integer SEQNUM = 1;
     public static final Long T_IPTETIME = 153236L;
     public static final Integer T_IPPBR = 2021;
@@ -392,6 +397,16 @@ public class ParseCBSMessageTest {
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("fullMessage"), is(true));
         assertThat(fieldMap.get("fullMessage"), is((Object)expectedJSON));
+        assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
+    }
+
+    @Test
+    public void testParseAnotherValidMessage() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        // check parse narative
+        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON2);
+        assertThat(fieldMap.containsKey("fullMessage"), is(true));
+        assertThat(fieldMap.get("fullMessage"), is((Object)expectedJSON2));
         assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
     }
 
