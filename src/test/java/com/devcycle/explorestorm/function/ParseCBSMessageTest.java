@@ -1,6 +1,7 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import storm.trident.operation.TridentCollector;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -404,7 +406,21 @@ public class ParseCBSMessageTest {
 
         parseMessage.execute(tuple, collector);
 
-        verify(collector).emit(null);
+        ArgumentCaptor<Values> values = ArgumentCaptor.forClass(Values.class);
+        verify(collector).emit(values.capture());
+        assertThat(values, notNullValue());
+        assertThat(values.getValue().size(), is(13));
+        assertTrue(isAllNulls(values.getAllValues()));
+    }
+
+    private boolean isAllNulls(List<Values> allValues) {
+        for (Values values : allValues ) {
+            for (Object value : values) {
+                if (value != null)
+                    return false;
+            }
+        }
+        return true;
     }
 
 

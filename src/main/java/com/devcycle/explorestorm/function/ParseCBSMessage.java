@@ -4,6 +4,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.devcycle.explorestorm.message.MessageTuple;
 import com.devcycle.explorestorm.util.JSONParser;
+import org.apache.commons.lang.NotImplementedException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -12,7 +13,8 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
-import java.math.BigDecimal;
+
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -101,7 +103,8 @@ public class ParseCBSMessage extends BaseFunction {
      * @return map of parsed fields and values
      */
     public Map<String, Object> parse(String jsonMessage) {
-        Map<String, Object> fieldsMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> fieldsMap = new LinkedHashMap<>();
+
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(jsonMessage);
@@ -120,7 +123,26 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap.put(ParseCBSMessage.FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
             LOG.error("Error in JSON: " + jsonMessage, e);
+            fieldsMap = populateNullValues();
         }
+        return fieldsMap;
+    }
+
+    private Map<String, Object> populateNullValues() {
+        HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
+        fieldsMap.put(ParseCBSMessage.FIELD_SEQNUM, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTETIME, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPPBR, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPPSTEM, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTTST, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTCLCDE, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTAM, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPCURCDE, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_HIACBL, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPCDATE, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTD, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_T_IPTXNARR, null);
+        fieldsMap.put(ParseCBSMessage.FIELD_FULL_MESSAGE, null);
         return fieldsMap;
     }
 }
