@@ -35,18 +35,16 @@ public class RemoveInvalidMessagesTest {
     @Test
     public void testValidMessage() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
         final String tIPPSTEM = "tIPPSTEM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( seqnum, tIPPSTEM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
         when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPSTEM, tIPTD });
         assertThat(filter.isKeep(tuple), is(true));
     }
 
