@@ -157,7 +157,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(ParseCBSMessage.getEmittedFields(),
                         new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
-                                new String[]{ParseCBSMessage.FIELD_T_IPPBR, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
+                                new String[]{ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
                 .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
