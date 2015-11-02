@@ -39,7 +39,6 @@ public class ParseCBSMessage extends BaseFunction {
     public static final String FIELD_T_IPTXNARR = "tIPTXNARR"; // narrative
     public static final String FIELD_FULL_MESSAGE = "fullMessage"; // full message
 
-
     private static final Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
     private static final Fields EMITTED_FIELDS = new Fields(
             FIELD_SEQNUM,

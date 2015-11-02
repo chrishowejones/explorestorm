@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import static junit.framework.TestCase.fail;
+import static org.apache.storm.hbase.common.Utils.toBytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -64,12 +66,12 @@ public class TestJson {
         assertThat(line.getInt("SEQNUM"), is(1));
         assertThat(line.getLong("tIPTETIME"), is(153236L));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
+        assertThat(line.getLong("tIPPSTEM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
-        assertThat(line.getLong("tIPTAM"), is(0L));
+        assertThat(line.getLong("tIPTAM"), is(50L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(165119L));
+        assertThat(line.getLong("tHIACBL"), is(10000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
@@ -82,12 +84,12 @@ public class TestJson {
         assertThat(line.length(), is(1240));
         assertThat(line.getInt("SEQNUM"), is(2));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
+        assertThat(line.getLong("tIPPSTEM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
-        assertThat(line.getLong("tIPTAM"), is(0L));
+        assertThat(line.getLong("tIPTAM"), is(50L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(165119L));
+        assertThat(line.getLong("tHIACBL"), is(10000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
@@ -101,12 +103,12 @@ public class TestJson {
         assertThat(line.length(), is(1241));
         assertThat(line.getInt("SEQNUM"), is(3));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(111000111L));
+        assertThat(line.getLong("tIPPSTEM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(201L));
         assertThat(line.getLong("tIPTCLCDE"), is(65737L));
-        assertThat(line.getLong("tIPTAM"), is(0L));
+        assertThat(line.getLong("tIPTAM"), is(50L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(165119L));
+        assertThat(line.getLong("tHIACBL"), is(3000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getInt("tIPTD"), is(151027));
         assertThat(line.has("tIPTXNARR"), is(false));
@@ -119,4 +121,5 @@ public class TestJson {
         assertThat(jsonObject.getString("spaces"), is("    "));
 
     }
+
 }

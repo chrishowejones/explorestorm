@@ -9,9 +9,8 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.function.CreateRowKey;
+import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
-import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
@@ -154,7 +153,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
                                 new String[]{ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
-                .each(ParseCBSMessage.getEmittedFields(), new CreateRowKey(), new Fields(ROW_KEY_FIELD));
+                .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
         Fields transformedFields = new Fields(

@@ -8,7 +8,10 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
+import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
+import com.devcycle.explorestorm.function.CreateOCISAccountRowKey;
+import com.devcycle.explorestorm.function.ExploreLogFunction;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.function.PrintFunction;
 import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
@@ -34,9 +37,7 @@ import storm.trident.TridentTopology;
 import storm.trident.state.StateFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
 import static com.devcycle.explorestorm.topologies.KafkaConfig.KAFKA_ZOOKEEPER_HOST_PORT;
@@ -55,6 +56,9 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     private static final String TOPOLOGY_NAME = "balanceAlertTopology";
     private static final Logger LOG = LoggerFactory.getLogger(BalanceAlertTopology.class);
     private static final String TABLE_NAME = "OCISDetails";
+    public static final String ROW_KEY = "rowKey";
+    public static final String CF_THRESHOLD = "cf_threshold";
+    public static final String THRESHOLD = "threshold";
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
 
@@ -142,37 +146,61 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
-        SimpleTridentHBaseMapper mapper = new SimpleTridentHBaseMapper().withRowKeyField(ParseCBSMessage.FIELD_T_IPPSTEM);
-        HBaseProjectionCriteria projectionCriteria = new HBaseProjectionCriteria();
-        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData("cf_threshold", "threshold"));
-        HBaseValueMapper rowToStormValueMapper = new ExploreMessageValueMapper();
-
-        HBaseState.Options options = new HBaseState.Options()
-                .withConfigKey(HBASE_CONFIG.toString())
-                .withMapper(mapper)
-                .withProjectionCriteria(projectionCriteria)
-                .withRowToStormValueMapper(rowToStormValueMapper)
-                .withTableName(TABLE_NAME);
-
-        final List<String> parsedFields = ParseCBSMessage.getEmittedFields().toList();
-        parsedFields.add(0, CBSKafkaScheme.FIELD_JSON_MESSAGE);
-        Fields outputFieldsFromParse = new Fields(parsedFields);
+        final Fields columnFields = new Fields(THRESHOLD);
+        HBaseState.Options options = buildOptions(columnFields);
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(),
                         new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(ParseCBSMessage.getEmittedFields(),
                         new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM, new String[]{ParseCBSMessage.FIELD_T_IPPSTEM}))
-                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new PrintFunction(), new Fields());
+                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
+                .each(new Fields(ROW_KEY), new ExploreLogFilter(this.getClass().getName()));
 
         StateFactory factory = new HBaseStateFactory(options);
 
-//        TridentState state = topology.newStaticState(factory);
+        TridentState state = topology.newStaticState(factory);
 
-//        stream.stateQuery(state, new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new HBaseQuery(), new Fields("columnName", "columnValue"))
-//            .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM, "columnName", "columnValue"), new PrintFunction(), new Fields());
+        List<String> outputFields = buildOutputFields(columnFields);
+
+        stream.stateQuery(state, new Fields(ROW_KEY), new HBaseQuery(), columnFields)
+                .each(new Fields(outputFields),
+                        new ExploreLogFilter(this.getClass().getName() + " - from HBase :"));
 
         return topology;
+    }
+
+    private HBaseState.Options buildOptions(Fields columnFields) {
+        SimpleTridentHBaseMapper mapper = new SimpleTridentHBaseMapper().withRowKeyField(ROW_KEY)
+                .withColumnFamily(CF_THRESHOLD)
+                .withColumnFields(columnFields);
+        HBaseProjectionCriteria projectionCriteria = new HBaseProjectionCriteria();
+        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData(CF_THRESHOLD, THRESHOLD));
+        Map<String, Fields> fieldsRequired = new LinkedHashMap<>();
+        fieldsRequired.put(CF_THRESHOLD, columnFields);
+        HBaseValueMapper rowToStormValueMapper = new OCISRowToValueMapper(fieldsRequired);
+
+        return new HBaseState.Options()
+                .withConfigKey(HBASE_CONFIG.toString())
+                .withMapper(mapper)
+                .withRowToStormValueMapper(rowToStormValueMapper)
+                .withTableName(TABLE_NAME);
+    }
+
+    private List<String> buildOutputFields(Fields columnFields) {
+        String[] fieldsArray =
+                {ROW_KEY, ParseCBSMessage.FIELD_T_HIACBL, ParseCBSMessage.FIELD_T_IPTAM, ParseCBSMessage.FIELD_T_IPTTST};
+        List<String> outputFields = buildColumnFields(columnFields, fieldsArray);
+        return outputFields;
+    }
+
+    private List<String> buildColumnFields(Fields columnFields, String[] fieldsArray) {
+        List<String> outputFields = new ArrayList<>();
+        outputFields.addAll(Arrays.asList(fieldsArray));
+        for (String fieldName : columnFields.toList()) {
+            outputFields.add(fieldName);
+        }
+        return outputFields;
     }
 
     /**
