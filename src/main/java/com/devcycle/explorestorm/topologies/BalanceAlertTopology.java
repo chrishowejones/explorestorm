@@ -10,10 +10,7 @@ import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.function.CreateOCISAccountRowKey;
-import com.devcycle.explorestorm.function.ExploreLogFunction;
-import com.devcycle.explorestorm.function.ParseCBSMessage;
-import com.devcycle.explorestorm.function.PrintFunction;
+import com.devcycle.explorestorm.function.*;
 import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
 import com.devcycle.explorestorm.mapper.OCISRowToValueMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
@@ -29,11 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storm.kafka.BrokerHosts;
 import storm.kafka.ZkHosts;
-import storm.kafka.trident.OpaqueTridentKafkaSpout;
-import storm.kafka.trident.TridentKafkaConfig;
+import storm.kafka.trident.*;
+import storm.kafka.trident.mapper.FieldNameBasedTupleToKafkaMapper;
+import storm.kafka.trident.selector.DefaultTopicSelector;
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
+import storm.trident.operation.builtin.FilterNull;
 import storm.trident.state.StateFactory;
 
 import java.io.IOException;
@@ -50,15 +49,22 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     public static final String STREAM_NAME = "CbsBalanceAlertStream";
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
+    public static final String METADATA_BROKER_LIST = "metadata.broker.list";
+    public static final String REQUEST_REQUIRED_ACKS = "request.required.acks";
 
+    private static final Logger LOG = LoggerFactory.getLogger(BalanceAlertTopology.class);
+
+    private static final String KAFKA_PUBLISH_TOPIC = "kafka.publish.topic";
+    private static final String ROW_KEY = "rowKey";
     private static final String KAFKA_TOPIC = "CBSTopic";
     private static final String TRIDENT_KAFKA_SPOUT = "BalanceAlertSpout";
     private static final String TOPOLOGY_NAME = "balanceAlertTopology";
-    private static final Logger LOG = LoggerFactory.getLogger(BalanceAlertTopology.class);
     private static final String TABLE_NAME = "OCISDetails";
-    public static final String ROW_KEY = "rowKey";
-    public static final String CF_THRESHOLD = "cf_threshold";
-    public static final String THRESHOLD = "threshold";
+    private static final String LOW_BALANCE_ALERT = "lowBalanceAlert";
+    private static final String SERIALIZER_CLASS = "serializer.class";
+    private static final String KAFKA_SERIALIZER_STRING_ENCODER = "kafka.serializer.StringEncoder";
+    private static final String ACCOUNT_NUMBER_STRING = "accountNumberStr";
+
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
 
@@ -90,6 +96,34 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     }
 
     /**
+     * Construct and return the config for this topology.
+     *
+     * @return config for this topology.
+     */
+    @Override
+    protected Config buildConfig() {
+        final Config config = new Config();
+        config.put(HBASE_CONFIG.toString(), buildHBaseConfig());
+        Properties props = new Properties();
+        props.put(METADATA_BROKER_LIST, topologyConfig.getProperty(METADATA_BROKER_LIST));
+        props.put(REQUEST_REQUIRED_ACKS, topologyConfig.getProperty(REQUEST_REQUIRED_ACKS));
+        props.put(SERIALIZER_CLASS, KAFKA_SERIALIZER_STRING_ENCODER);
+        config.put(TridentKafkaState.KAFKA_BROKER_PROPERTIES, props);
+        return config;
+    }
+
+    /**
+     * Build the balance alert topology.
+     *
+     * @return topology
+     */
+    @Override
+    protected StormTopology buildTopology() {
+        TridentTopology topology = buildTridentTopology();
+        return topology.build();
+    }
+
+    /**
      * Used for DI when testing.
      *
      * @param cbsKafkaScheme
@@ -110,30 +144,6 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     }
 
     /**
-     * Construct and return the config for this topology.
-     *
-     * @return config for this topology.
-     */
-    @Override
-    protected Config buildConfig() {
-        final Config config = new Config();
-        config.put(HBASE_CONFIG.toString(), buildHBaseConfig());
-
-        return config;
-    }
-
-    /**
-     * Build the balance alert topology.
-     *
-     * @return topology
-     */
-    @Override
-    protected StormTopology buildTopology() {
-        TridentTopology topology = buildTridentTopology();
-        return topology.build();
-    }
-
-    /**
      * Build Trident Topology
      *
      * @return trident topology
@@ -146,14 +156,15 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
-        final Fields columnFields = new Fields(THRESHOLD);
+        // TODO tidy up this code around column fields and output fields
+        final Fields columnFields = new Fields(OCISDetails.THRESHOLD.getValue());
         HBaseState.Options options = buildOptions(columnFields);
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(),
                         new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
-                .each(ParseCBSMessage.getEmittedFields(),
-                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM, new String[]{ParseCBSMessage.FIELD_T_IPPSTEM}))
+                .each(new Fields(ParseCBSMessage.FIELD_SEQNUM, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_HIACBL),
+                        new FilterNull())
                 .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
                 .each(new Fields(ROW_KEY), new ExploreLogFilter(this.getClass().getName()));
 
@@ -163,21 +174,53 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         List<String> outputFields = buildOutputFields(columnFields);
 
-        stream.stateQuery(state, new Fields(ROW_KEY), new HBaseQuery(), columnFields)
+        stream = stream.stateQuery(state, new Fields(ROW_KEY), new HBaseQuery(), columnFields)
                 .each(new Fields(outputFields),
-                        new ExploreLogFilter(this.getClass().getName() + " - from HBase :"));
+                        new ExploreLogFilter(this.getClass().getName() + " - from HBase :"))
+                .each(new Fields(OCISDetails.THRESHOLD.getValue()), new FilterNull())
+                .each(new Fields(ParseCBSMessage.FIELD_T_HIACBL, ParseCBSMessage.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue()), new RaiseLowBalanceAlert(), new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT))
+                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM, LOW_BALANCE_ALERT), new FilterNull());
+
+        buildKafkaSink(stream);
 
         return topology;
     }
 
+    /**
+     * Get the HBaseConfigBuilder.
+     *
+     * @return HBaseConfigBuilder
+     */
+    HBaseConfigBuilder getHBaseConfigBuilder() {
+        if (hbaseConfigBuilder == null)
+            this.hbaseConfigBuilder = new HBaseConfigBuilder();
+        return hbaseConfigBuilder;
+    }
+
+    /**
+     * Set HBaseConfigBuilder to be used for dependency injection and testing.
+     *
+     * @param hbaseConfigBuilder
+     */
+    void setHBaseConfigBuilder(HBaseConfigBuilder hbaseConfigBuilder) {
+        this.hbaseConfigBuilder = hbaseConfigBuilder;
+    }
+
+    private void buildKafkaSink(Stream stream) {
+        TridentKafkaStateFactory stateFactory = new TridentKafkaStateFactory()
+                .withKafkaTopicSelector(new DefaultTopicSelector(topologyConfig.getProperty(KAFKA_PUBLISH_TOPIC)))
+                .withTridentTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT));
+        stream.partitionPersist(stateFactory, new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new TridentKafkaUpdater(), new Fields());
+    }
+
     private HBaseState.Options buildOptions(Fields columnFields) {
         SimpleTridentHBaseMapper mapper = new SimpleTridentHBaseMapper().withRowKeyField(ROW_KEY)
-                .withColumnFamily(CF_THRESHOLD)
+                .withColumnFamily(OCISDetails.CF_THRESHOLD.getValue())
                 .withColumnFields(columnFields);
         HBaseProjectionCriteria projectionCriteria = new HBaseProjectionCriteria();
-        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData(CF_THRESHOLD, THRESHOLD));
+        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData(OCISDetails.CF_THRESHOLD.getValue(), OCISDetails.THRESHOLD.getValue()));
         Map<String, Fields> fieldsRequired = new LinkedHashMap<>();
-        fieldsRequired.put(CF_THRESHOLD, columnFields);
+        fieldsRequired.put(OCISDetails.CF_THRESHOLD.getValue(), columnFields);
         HBaseValueMapper rowToStormValueMapper = new OCISRowToValueMapper(fieldsRequired);
 
         return new HBaseState.Options()
@@ -201,26 +244,6 @@ public class BalanceAlertTopology extends BaseExploreTopology {
             outputFields.add(fieldName);
         }
         return outputFields;
-    }
-
-    /**
-     * Get the HBaseConfigBuilder.
-     *
-     * @return HBaseConfigBuilder
-     */
-    HBaseConfigBuilder getHBaseConfigBuilder() {
-        if (hbaseConfigBuilder == null)
-            this.hbaseConfigBuilder = new HBaseConfigBuilder();
-        return hbaseConfigBuilder;
-    }
-
-    /**
-     * Set HBaseConfigBuilder to be used for dependency injection and testing.
-     *
-     * @param hbaseConfigBuilder
-     */
-    void setHBaseConfigBuilder(HBaseConfigBuilder hbaseConfigBuilder) {
-        this.hbaseConfigBuilder = hbaseConfigBuilder;
     }
 
     private HashMap<String, Object> buildHBaseConfig() {

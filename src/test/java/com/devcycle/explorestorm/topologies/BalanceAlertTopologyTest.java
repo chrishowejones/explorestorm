@@ -5,6 +5,7 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,6 +23,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -35,10 +37,17 @@ public class BalanceAlertTopologyTest {
     @Mock
     private Properties mockConfigProperties;
 
+    @Before
+    public void setUp() {
+        when(mockConfigProperties.getProperty(BalanceAlertTopology.METADATA_BROKER_LIST)).thenReturn("hostgroupslave2-8-lloyds-20150923072910:6667");
+        when(mockConfigProperties.getProperty(BalanceAlertTopology.REQUEST_REQUIRED_ACKS)).thenReturn("1");
+    }
+
 
     @Test
     public void testBuildConfig() throws IOException {
-        BalanceAlertTopology topology = new BalanceAlertTopology("");
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
+
         Config config = topology.buildConfig();
         assertThat(config, notNullValue());
         assertThat(config, hasEntry(is(HBASE_CONFIG.toString()), notNullValue()));
@@ -49,7 +58,7 @@ public class BalanceAlertTopologyTest {
         // mock znode parent
         final String znodeParent = "test.znode";
         givenHBaseConfigBuilder();
-        BalanceAlertTopology topology = new BalanceAlertTopology("");
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
         // inject mock HBaseConfigBuilder
         topology.setHBaseConfigBuilder(mockHBaseConfigBuilder);
 
