@@ -3,41 +3,51 @@ package com.devcycle.explorestorm.topologies;
 import backtype.storm.Config;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
-import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
-import org.apache.storm.hbase.trident.state.HBaseStateFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import storm.kafka.trident.OpaqueTridentKafkaSpout;
+import storm.trident.TridentTopology;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
 import static com.devcycle.explorestorm.topologies.HBaseConfig.HBASE_CONFIG;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 
 /**
- * Created by chris howe-jones on 21/10/15.
+ * Created by chris howe-jones on 29/10/15.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PersistCBSTopologyTest {
+public class BalanceAlertTopologyTest {
 
     @Mock
     private HBaseConfigBuilder mockHBaseConfigBuilder;
     @Mock
     private Properties mockConfigProperties;
 
+    @Before
+    public void setUp() {
+        when(mockConfigProperties.getProperty(BalanceAlertTopology.METADATA_BROKER_LIST)).thenReturn("hostgroupslave2-8-lloyds-20150923072910:6667");
+        when(mockConfigProperties.getProperty(BalanceAlertTopology.REQUEST_REQUIRED_ACKS)).thenReturn("1");
+    }
+
+
     @Test
     public void testBuildConfig() throws IOException {
-        PersistCBSTopology topology = new PersistCBSTopology("");
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
+
         Config config = topology.buildConfig();
         assertThat(config, notNullValue());
         assertThat(config, hasEntry(is(HBASE_CONFIG.toString()), notNullValue()));
@@ -48,7 +58,7 @@ public class PersistCBSTopologyTest {
         // mock znode parent
         final String znodeParent = "test.znode";
         givenHBaseConfigBuilder();
-        PersistCBSTopology topology = new PersistCBSTopology("");
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
         // inject mock HBaseConfigBuilder
         topology.setHBaseConfigBuilder(mockHBaseConfigBuilder);
 
@@ -59,7 +69,7 @@ public class PersistCBSTopologyTest {
 
     @Test
     public void testBuildTopology() throws IOException {
-        PersistCBSTopology topology = new PersistCBSTopology(new Properties());
+        BalanceAlertTopology topology = new BalanceAlertTopology(mockConfigProperties);
         topology.setCbsKafkaScheme(new CBSKafkaScheme());
         // assert that topology returned with KafkaSpout configured.
         final StormTopology stormTopology = topology.buildTopology();
@@ -67,14 +77,6 @@ public class PersistCBSTopologyTest {
         assertThat(stormTopology.get_spouts(), notNullValue());
         assertThat(stormTopology.get_spouts().size(), is(1));
         assertThat(stormTopology.get_bolts().size(), is(3));
-        assertThat(stormTopology.get_state_spouts_size(), is(0));
-    }
-
-    @Test
-    public void testBuildHBaseStateFactory() {
-        PersistCBSTopology topology = new PersistCBSTopology(mockConfigProperties);
-        HBaseStateFactory factory = topology.buildCBSHBaseStateFactory(new ArrayList<String>());
-        assertThat(factory, notNullValue());
     }
 
     private void givenHBaseConfigBuilder() {
@@ -82,7 +84,6 @@ public class PersistCBSTopologyTest {
         expectedHBaseConfig.put(HBaseConfigBuilder.ZOOKEEPER_ZNODE_PARENT, "test.znode");
 
         when(mockHBaseConfigBuilder.getHBaseConfig(any(Properties.class)))
-        .thenReturn(expectedHBaseConfig);
+                .thenReturn(expectedHBaseConfig);
     }
-
 }

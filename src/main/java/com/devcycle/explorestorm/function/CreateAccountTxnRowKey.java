@@ -8,7 +8,7 @@ import storm.trident.tuple.TridentTuple;
 /**
  * Created by chris howe-jones on 27/10/15.
  */
-public class CreateRowKey extends BaseFunction {
+public class CreateAccountTxnRowKey extends BaseFunction {
 
     /**
      * Transform the CBS message to create a rowKey for HBase that is composite key of

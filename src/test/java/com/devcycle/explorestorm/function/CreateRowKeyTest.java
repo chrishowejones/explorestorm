@@ -20,7 +20,7 @@ public class CreateRowKeyTest {
 
     @Test
     public void testExecute() {
-        CreateRowKey transform = new CreateRowKey();
+        CreateAccountTxnRowKey transform = new CreateAccountTxnRowKey();
         TridentTuple tuple = mock(TridentTuple.class);
         Mockito.when(tuple.getIntegerByField(ParseCBSMessage.FIELD_T_IPPBR)).thenReturn(123);
         Mockito.when(tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM)).thenReturn(987654321L);

@@ -24,7 +24,7 @@ public class ExploreLogFilter implements Filter {
     }
 
     public boolean isKeep(TridentTuple tuple) {
-        LOG.info("******" + sourceTopologyName + "****** " + ExploreScheme.prettyPrintTuple(tuple));
+        LOG.info("******" + sourceTopologyName + "****** tuple = " + tuple.toString());
         return true;
     }
 

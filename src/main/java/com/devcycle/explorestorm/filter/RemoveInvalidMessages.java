@@ -38,8 +38,10 @@ public class RemoveInvalidMessages implements Filter {
     }
 
     private boolean validMessage(TridentTuple tuple) {
-        LOG.info("Discarded invalid message : " + tuple.get(0));
-        return validTuple(tuple) && validFormat(tuple);
+        final boolean validMessage = validTuple(tuple) && validFormat(tuple);
+        if (!validMessage)
+            LOG.info("Discarded invalid message : " + tuple.get(0));
+        return validMessage;
     }
 
     private boolean validFormat(TridentTuple tuple) {
@@ -65,7 +67,7 @@ public class RemoveInvalidMessages implements Filter {
 
     private boolean hasFieldsAndValues(TridentTuple tuple) {
         return tuple.getFields() != null && tuple.getFields().size() > 0 && !tuple.isEmpty()
-                && tuple.size() > 1 && tuple.getValues() != null && tuple.getValues().size() > 1;
+                && tuple.size() > 0 && tuple.getValues() != null && tuple.getValues().size() > 0;
     }
 
     private boolean validTuple(TridentTuple tuple) {
