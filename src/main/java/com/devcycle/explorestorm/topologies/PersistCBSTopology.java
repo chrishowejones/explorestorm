@@ -9,6 +9,7 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
+import com.devcycle.explorestorm.function.CBSMessageFields;
 import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
@@ -151,25 +152,25 @@ public class PersistCBSTopology extends BaseExploreTopology {
         final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(outputFieldsFromParse,
-                        new RemoveInvalidMessages(ParseCBSMessage.FIELD_SEQNUM,
-                                new String[]{ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_IPTD}))
+                        new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
+                                new String[]{CBSMessageFields.FIELD_T_IPPSTEM, CBSMessageFields.FIELD_T_IPTD}))
                 .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
         Fields transformedFields = new Fields(
-                ParseCBSMessage.FIELD_SEQNUM,
-                ParseCBSMessage.FIELD_T_IPTETIME,
-                ParseCBSMessage.FIELD_T_IPPBR,
-                ParseCBSMessage.FIELD_T_IPPSTEM,
-                ParseCBSMessage.FIELD_T_IPTTST,
-                ParseCBSMessage.FIELD_T_IPTCLCDE,
-                ParseCBSMessage.FIELD_T_IPTAM,
-                ParseCBSMessage.FIELD_T_IPCURCDE,
-                ParseCBSMessage.FIELD_T_HIACBL,
-                ParseCBSMessage.FIELD_T_IPCDATE,
-                ParseCBSMessage.FIELD_T_IPTD,
-                ParseCBSMessage.FIELD_T_IPTXNARR,
-                ParseCBSMessage.FIELD_FULL_MESSAGE,
+                CBSMessageFields.FIELD_SEQNUM,
+                CBSMessageFields.FIELD_T_IPTETIME,
+                CBSMessageFields.FIELD_T_IPPBR,
+                CBSMessageFields.FIELD_T_IPPSTEM,
+                CBSMessageFields.FIELD_T_IPTTST,
+                CBSMessageFields.FIELD_T_IPTCLCDE,
+                CBSMessageFields.FIELD_T_IPTAM,
+                CBSMessageFields.FIELD_T_IPCURCDE,
+                CBSMessageFields.FIELD_T_HIACBL,
+                CBSMessageFields.FIELD_T_IPCDATE,
+                CBSMessageFields.FIELD_T_IPTD,
+                CBSMessageFields.FIELD_T_IPTXNARR,
+                CBSMessageFields.FIELD_FULL_MESSAGE,
                 ROW_KEY_FIELD
         );
 
@@ -194,12 +195,12 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
 
         List<String> messageFields = new ArrayList<>();
-        messageFields.add(ParseCBSMessage.FIELD_FULL_MESSAGE);
+        messageFields.add(CBSMessageFields.FIELD_FULL_MESSAGE);
 
         TridentHBaseMapper tridentHBaseMapper = new AccountTransactionMapper()
                 .withRowKeyField(ROW_KEY_FIELD)
                 .withColumnFamilies(columnFamilies)
-                .withTransactionId(ParseCBSMessage.FIELD_SEQNUM)
+                .withTransactionId(CBSMessageFields.FIELD_SEQNUM)
                 .withColumnFieldPrefixes(STATEMENT_DATA_CF, fieldsToPersist)
                 .withColumnFieldPrefixes(MESSAGE_CF, messageFields);
 
@@ -243,16 +244,16 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
     private List<String> getFieldsToPersistForAccountTxn() {
         List<String> fieldsToPersist = new ArrayList<>();
-        fieldsToPersist.add(ParseCBSMessage.FIELD_SEQNUM);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTETIME);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTTST);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTCLCDE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTAM);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCURCDE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_HIACBL);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPCDATE);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTD);
-        fieldsToPersist.add(ParseCBSMessage.FIELD_T_IPTXNARR);
+        fieldsToPersist.add(CBSMessageFields.FIELD_SEQNUM);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTETIME);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTTST);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTCLCDE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTAM);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPCURCDE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_HIACBL);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPCDATE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTD);
+        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTXNARR);
         return fieldsToPersist;
     }
 

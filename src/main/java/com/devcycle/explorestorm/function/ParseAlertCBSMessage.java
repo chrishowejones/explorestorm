@@ -12,51 +12,37 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Trident function to parse CBS message from a String.
- * <p/>
- * Created by chrishowe-jones on 20/10/15.
+ * Created by chris howe-jones on 03/11/15.
  */
-public class ParseCBSMessage extends BaseFunction {
+public class ParseAlertCBSMessage extends BaseFunction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ParseAlertCBSMessage.class);
     private static final Fields EMITTED_FIELDS = new Fields(
             CBSMessageFields.FIELD_SEQNUM,
-            CBSMessageFields.FIELD_T_IPTETIME,
-            CBSMessageFields.FIELD_T_IPPBR,
             CBSMessageFields.FIELD_T_IPPSTEM,
             CBSMessageFields.FIELD_T_IPTTST,
-            CBSMessageFields.FIELD_T_IPTCLCDE,
-            CBSMessageFields.FIELD_T_IPTAM,
-            CBSMessageFields.FIELD_T_IPCURCDE,
+            CBSMessageFields.FIELD_T_IPTCLASS,
             CBSMessageFields.FIELD_T_HIACBL,
-            CBSMessageFields.FIELD_T_IPCDATE,
-            CBSMessageFields.FIELD_T_IPTD,
-            CBSMessageFields.FIELD_T_IPTXNARR,
-            CBSMessageFields.FIELD_FULL_MESSAGE
+            CBSMessageFields.FIELD_T_IPTAM
     );
-    private final JSONParser jsonParser = new JSONParser();
     private String fieldJsonString;
 
+    private final JSONParser jsonParser = new JSONParser();
+
     /**
-     * Create a ParseCBSMessage function with the field name of the CBS message in the Trident Tuple
+     * Create a ParseAlertCBSMessage function with the field name of the CBS message in the Trident Tuple
      *
      * @param fieldJsonString - tuple field name of input JSON message.
      */
-    public ParseCBSMessage(String fieldJsonString) {
+    public ParseAlertCBSMessage(String fieldJsonString) {
         this.fieldJsonString = fieldJsonString;
     }
 
-    /**
-     * Get the emitted fields from this function.
-     *
-     * @return fields emitted from this function.
-     */
     public static Fields getEmittedFields() {
         return EMITTED_FIELDS;
     }
@@ -93,18 +79,11 @@ public class ParseCBSMessage extends BaseFunction {
         try {
             jsonObject = new JSONObject(jsonMessage);
             fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_SEQNUM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTETIME, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_T_IPTETIME));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPPBR, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPPBR));
             fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_T_IPPSTEM));
             fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTTST));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLCDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTCLCDE));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_IPTAM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPCURCDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPCURCDE));
+            fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLASS, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTCLASS));
             fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_HIACBL));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPCDATE, jsonParser.parseDateString(jsonObject, CBSMessageFields.FIELD_T_IPCDATE));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTD, jsonParser.parseDateString(jsonObject, CBSMessageFields.FIELD_T_IPTD));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTXNARR, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_T_IPTXNARR));
-            fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, jsonMessage);
+            fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_IPTAM));
         } catch (JSONException e) {
             LOG.warn("Error in JSON: " + jsonMessage, e);
             fieldsMap = populateNullValues();
@@ -115,19 +94,10 @@ public class ParseCBSMessage extends BaseFunction {
     private Map<String, Object> populateNullValues() {
         HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTETIME, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPPBR, null);
         fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, null);
         fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLCDE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPCURCDE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLASS, null);
         fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPCDATE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTD, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTXNARR, null);
-        fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, null);
         return fieldsMap;
     }
 }
-
