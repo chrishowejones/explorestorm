@@ -1,7 +1,6 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
-import com.devcycle.explorestorm.topologies.BalanceAlertTopology;
 import com.devcycle.explorestorm.topologies.OCISDetails;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,13 +31,20 @@ public class RaiseLowBalanceAlertTest {
     @Test
     public void testRaiseAlert() {
         // mock tuple to return account number, balance threshold and balance
-        BigDecimal balance = new BigDecimal("39.99");
+        BigDecimal balance = new BigDecimal("39.99").setScale(2);
         String threshold = "40";
         long accountNumber = 1234567L;
+        Integer transactionClass = 6;
+        Integer transactionType = 2269;
+        BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
+
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(ParseCBSMessage.FIELD_T_HIACBL)).thenReturn(balance);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
         when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -51,16 +57,26 @@ public class RaiseLowBalanceAlertTest {
         assertThat(values.size(), is(2));
 
         assertThat((String)values.get(0), is(accountNumberString));
-        assertThat((String)values.get(1), containsString("balance is under expected threshold"));
+        assertThat((String)values.get(1), containsString("1234567|balance is under expected threshold|39.99"));
     }
 
     @Test
-    public void testDontRaiseAlertBalanceEqualsThreshold() {
-        // mock tuple to return balance threshold and balance
-        BigDecimal balance = new BigDecimal("40");
+    public void testDontRaiseAlertAmountDidntTipBalance() {
+        // mock tuple to return account number, balance threshold and balance
+        BigDecimal balance = new BigDecimal("3.99").setScale(2);
         String threshold = "40";
-        when(tuple.getValueByField(ParseCBSMessage.FIELD_T_HIACBL)).thenReturn(balance);
+        long accountNumber = 1234567L;
+        Integer transactionClass = 6;
+        Integer transactionType = 2269;
+        BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
+
+        String accountNumberString = Long.toString(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
         when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -71,7 +87,122 @@ public class RaiseLowBalanceAlertTest {
         Values values = valuesCaptor.getValue();
         assertThat(values, notNullValue());
         assertThat(values.size(), is(2));
-        assertThat((String)values.get(0), is("0"));
+        assertThat((String)values.get(0), is(accountNumberString));
+        assertThat(values.get(1), nullValue());
+    }
+
+    @Test
+    public void testRaiseAlertStandingOrderDebit() {
+        // mock tuple to return account number, balance threshold and balance
+        BigDecimal balance = new BigDecimal("39.99").setScale(2);
+        String threshold = "40";
+        long accountNumber = 1234567L;
+        Integer transactionClass = 15;
+        Integer transactionType = 2269;
+        BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
+
+        String accountNumberString = Long.toString(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        alertFunction.execute(tuple, collector);
+
+        ArgumentCaptor<Values> valuesCaptor = ArgumentCaptor.forClass(Values.class);
+        verify(collector).emit(valuesCaptor.capture());
+
+        Values values = valuesCaptor.getValue();
+        assertThat(values, notNullValue());
+        assertThat(values.size(), is(2));
+
+        assertThat((String)values.get(0), is(accountNumberString));
+        assertThat((String)values.get(1), containsString("1234567|balance is under expected threshold|39.99"));
+    }
+
+    @Test
+    public void testDontRaiseAlertNotDebitTxnClass() {
+        // mock tuple to return account number, balance threshold and balance
+        BigDecimal balance = new BigDecimal("39.99").setScale(2);
+        String threshold = "40";
+        long accountNumber = 1234567L;
+        Integer transactionClass = 5;
+        Integer transactionType = 2269;
+
+        String accountNumberString = Long.toString(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        alertFunction.execute(tuple, collector);
+
+        ArgumentCaptor<Values> valuesCaptor = ArgumentCaptor.forClass(Values.class);
+        verify(collector).emit(valuesCaptor.capture());
+
+        Values values = valuesCaptor.getValue();
+        assertThat(values, notNullValue());
+        assertThat(values.size(), is(2));
+        assertThat((String)values.get(0), is(accountNumberString));
+        assertThat(values.get(1), nullValue());
+    }
+
+    @Test
+    public void testDontRaiseAlertNotDebitTxnType() {
+        // mock tuple to return account number, balance threshold and balance
+        BigDecimal balance = new BigDecimal("39.99").setScale(2);
+        String threshold = "40";
+        long accountNumber = 1234567L;
+        Integer transactionClass = 15;
+        Integer transactionType = 2268;
+
+        String accountNumberString = Long.toString(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        alertFunction.execute(tuple, collector);
+
+        ArgumentCaptor<Values> valuesCaptor = ArgumentCaptor.forClass(Values.class);
+        verify(collector).emit(valuesCaptor.capture());
+
+        Values values = valuesCaptor.getValue();
+        assertThat(values, notNullValue());
+        assertThat(values.size(), is(2));
+        assertThat((String)values.get(0), is(accountNumberString));
+        assertThat(values.get(1), nullValue());
+    }
+
+    @Test
+    public void testDontRaiseAlertBalanceEqualsThreshold() {
+        // mock tuple to return balance threshold and balance
+        BigDecimal balance = new BigDecimal("40");
+        String threshold = "40";
+        long accountNumber = 1234567L;
+        String accountNumberString = Long.toString(accountNumber);
+
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        alertFunction.execute(tuple, collector);
+
+        ArgumentCaptor<Values> valuesCaptor = ArgumentCaptor.forClass(Values.class);
+        verify(collector).emit(valuesCaptor.capture());
+
+        Values values = valuesCaptor.getValue();
+        assertThat(values, notNullValue());
+        assertThat(values.size(), is(2));
+        assertThat((String)values.get(0), is(accountNumberString));
         assertThat(values.get(1), nullValue());
     }
 
@@ -80,8 +211,12 @@ public class RaiseLowBalanceAlertTest {
         // mock tuple to return balance threshold and balance
         BigDecimal balance = new BigDecimal("40.01");
         String threshold = "40";
-        when(tuple.getValueByField(ParseCBSMessage.FIELD_T_HIACBL)).thenReturn(balance);
+        long accountNumber = 1234567L;
+        String accountNumberString = Long.toString(accountNumber);
+
+        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
         when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -92,8 +227,25 @@ public class RaiseLowBalanceAlertTest {
         Values values = valuesCaptor.getValue();
         assertThat(values, notNullValue());
         assertThat(values.size(), is(2));
-        assertThat((String)values.get(0), is("0"));
+        assertThat((String)values.get(0), is(accountNumberString));
         assertThat(values.get(1), nullValue());
     }
 
+    @Test
+    public void testDebitTransactionClasses() {
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        int[] debitTransactionClasses = {6, 10,13,17,20};
+        for (int txnClass : debitTransactionClasses) {
+            assertThat(alertFunction.isDebit(txnClass, 1), is(true));
+        }
+    }
+
+    @Test
+    public void testDebitStandingOrder() {
+        RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
+        int[] debitSOTxnTypes = {2269, 2270, 2503, 2505, 3037, 3039};
+        for (int txnType : debitSOTxnTypes) {
+            assertThat(alertFunction.isStandingOrderDebit(15, txnType), is(true));
+        }
+    }
 }

@@ -1,7 +1,6 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import storm.trident.operation.TridentCollector;
@@ -13,21 +12,32 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * Created by chrishowe-jones on 20/10/15.
+ * Created by chrishowe-jones on 03/11/15.
  */
-public class ParseCBSMessageTest {
+public class ParseAlertCBSMessageTest {
+
+    public static final Integer SEQNUM = 1;
+    public static final Long T_IPPSTEM = 987654321L;
+    public static final BigDecimal T_HIACBL = new BigDecimal("1234567890.99").setScale(2);
+    private static final Integer T_IPTCLASS = 15;
+    private static final Integer T_IPTTST = 2269;
+    private static final BigDecimal T_IPTAM = new BigDecimal("30.99").setScale(2);
 
     private static final String expectedJSON = "{\"TCLCLCID\":\"NH\",\"TCLCLAPGPNO\":13,\"SEQNUM\":1,\"tLOLOGTYP\":10,\"tLOLOGSCE\":[1]," +
             "\"tLOLGSRCE\":2,\"tLOLODATE\":null,\"tLOPRDTE\":null,\"tLORPDATE\":null,\"tLOBRANCH\":0,\"tLOBRTD\":0," +
-            "\"tLONUMBER\":0,\"tLORSUB\":0,\"tLOFORMCD\":0,\"tLOFORMSB\":0,\"tIPTCLCDE\":999,\"tIPTCLASS\":0," +
-            "\"tIPCORIND\":0,\"tIPTTST\":123,\"tIPTQUAL\":0,\"tIPTSPACE\":null,\"tIPTID\":0,\"tIPPBR\":2021," +
+            "\"tLONUMBER\":0,\"tLORSUB\":0,\"tLOFORMCD\":0,\"tLOFORMSB\":0,\"tIPTCLCDE\":999,\"tIPTCLASS\":15," +
+            "\"tIPCORIND\":0,\"tIPTTST\":2269,\"tIPTQUAL\":0,\"tIPTSPACE\":null,\"tIPTID\":0,\"tIPPBR\":2021," +
             "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":00000000000000,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
-            "\"tIPLTAM\":0,\"tIPTAM\":10000000000,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
+            "\"tIPLTAM\":0,\"tIPTAM\":3099,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
             "\"tIPPRTP\":10,\"tIPPABNCD\":0,\"tIPRGPABR\":0,\"tIPPAHOBR\":0,\"tIPPRGOCD\":0,\"tIPSECBR\":0," +
             "\"tIPSECATP\":0,\"tIPSECCDG\":0,\"tIPSECSTM\":0,\"tIPRCVBR\":0,\"tIPRCVAT\":0,\"tIPRCVCD\":0," +
             "\"tIPRCVST\":0,\"tIPTD\":null,\"tIPLCHOID\":0,\"tHIASDINT\":0,\"tIPPHOIND\":0,\"tIPPROIN\":0,\"tIPPBRIN\":0," +
@@ -163,26 +173,10 @@ public class ParseCBSMessageTest {
             "\"oEDOPBFTP\":\"\",\"oEDIPSBTP\":\"\",\"oEDOPSBTP\":\"\",\"oEDSTATUS\":0,\"oEDF03\":\"\",\"tMIPCFLAC\":0,\"tMILCONTR\":0,\"tMIOBHSGP\":0,\"tMISPBNCD\":0," +
             "\"tMISPRGCD\":0,\"tMISPRGDX\":0,\"tMILENVTR\":0,\"tMISPDCHC\":0,\"tMIF07\":0,\"tMISPRPDT\":0,\"tMIF03\":0,\"tMIF02\":0,\"tMIF01\":\"\"}";
 
-    private static final String expectedJSON2 = "{\"SEQNUM\":123,\"tIPPBR\":2021,\"tIPTTST\":123,\"tIPPSTEM\":987654321,\"tIPTAM\":10000000000," +
-            "\"tIPTCLCDE\":999,\"tIPCURCDE\":12,\"tHIACBL\":123456789099,\"tIPCDATE\":151013,\"IPTD\":\"2015-10-01\""+
-             "}";
-
-    public static final Integer SEQNUM = 1;
-    public static final Long T_IPTETIME = 153236L;
-    public static final Integer T_IPPBR = 2021;
-    public static final Long T_IPPSTEM = 987654321L;
-    public static final Integer T_IPTTST = 123;
-    public static final Integer T_IPTCLCDE = 999;
-    public static final BigDecimal T_IPTAM = new BigDecimal("100000000.00").setScale(2);
-    public static final Integer T_IPCURCDE = 12;
-    public static final BigDecimal T_HIACBL = new BigDecimal("1234567890.99").setScale(2);
-    public static final String T_IPCDATE = "2015-10-13";
-    public static final Long T_IPTD = null;
-    public static final String T_IPTXNARR = null;
 
     @Test
     public void testExecute() throws Exception {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // given JSON string in tuple and a trident collector
         TridentTuple tuple = givenJSONTuple();
         TridentCollector collector = givenCollector();
@@ -196,7 +190,7 @@ public class ParseCBSMessageTest {
 
     @Test
     public void testParseSeqNumber() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse sequence number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("SEQNUM"), is(true));
@@ -205,37 +199,8 @@ public class ParseCBSMessageTest {
     }
 
     @Test
-    public void testParseT_IPTETIME() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse time in milliseconds since midnight
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
-        assertThat(fieldMap.get("tIPTETIME"), is((Object) T_IPTETIME));
-        assertThat(fieldMap.get("tIPTETIME"), instanceOf(Long.class));
-    }
-
-    @Test
-    public void testParseT_IPTETIME_Null() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        String testJSON = "{\"tIPTETIME\":null}";
-        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
-        assertThat(fieldMap.get("tIPTETIME"), nullValue());
-    }
-
-    @Test
-    public void testParseT_IPPBR() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse branch code
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPPBR"), is(true));
-        assertThat(fieldMap.get("tIPPBR"), is((Object) T_IPPBR));
-        assertThat(fieldMap.get("tIPPBR"), instanceOf(Integer.class));
-    }
-
-    @Test
     public void testParseT_IPPSTEM() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPPSTEM"), is(true));
@@ -245,7 +210,7 @@ public class ParseCBSMessageTest {
 
     @Test
     public void testParseT_IPTTST() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPTTST"), is(true));
@@ -254,84 +219,18 @@ public class ParseCBSMessageTest {
     }
 
     @Test
-    public void testParseT_IPTCLCDE() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+    public void testParseT_IPTCLASS() {
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTCLCDE"), is(true));
-        assertThat(fieldMap.get("tIPTCLCDE"), is((Object) T_IPTCLCDE));
-        assertThat(fieldMap.get("tIPTCLCDE"), instanceOf(Integer.class));
-    }
-
-    @Test
-    public void testParseT_IPTAM() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
-        assertThat(fieldMap.get("tIPTAM"), is((Object) T_IPTAM));
-        assertThat(fieldMap.get("tIPTAM"), instanceOf(BigDecimal.class));
-    }
-
-    @Test
-    public void testParseT_IPTAM_Zero() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        String testJSON = "{\"tIPTAM\":0}";
-
-        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
-        assertThat(fieldMap.get("tIPTAM"), is((Object) new BigDecimal("0.00")));
-        assertThat(fieldMap.get("tIPTAM"), instanceOf(BigDecimal.class));
-    }
-
-    @Test
-    public void testParseT_IPTAM_TenPence() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        String testJSON = "{\"tIPTAM\":10}";
-
-        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
-        assertThat(fieldMap.get("tIPTAM"), is((Object) new BigDecimal("0.1").setScale(2)));
-        assertThat(fieldMap.get("tIPTAM"), instanceOf(BigDecimal.class));
-    }
-
-    @Test
-    public void testParseT_IPTAM_OnePence() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        String testJSON = "{\"tIPTAM\":1}";
-
-        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
-        assertThat(fieldMap.get("tIPTAM"), is((Object) new BigDecimal("0.01").setScale(2)));
-        assertThat(fieldMap.get("tIPTAM"), instanceOf(BigDecimal.class));
-    }
-
-    @Test
-    public void testParseT_IPTAM_null() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        String testJSON = "{\"tIPTAM\":null}";
-        Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTAM"), is(true));
-        assertThat(fieldMap.get("tIPTAM"), nullValue());
-    }
-
-    @Test
-    public void testParseT_IPCURCDE() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPCURCDE"), is(true));
-        assertThat(fieldMap.get("tIPCURCDE"), is((Object) T_IPCURCDE));
-        assertThat(fieldMap.get("tIPCURCDE"), instanceOf(Integer.class));
+        assertThat(fieldMap.containsKey("tIPTCLASS"), is(true));
+        assertThat(fieldMap.get("tIPTCLASS"), is((Object) T_IPTCLASS));
+        assertThat(fieldMap.get("tIPTCLASS"), instanceOf(Integer.class));
     }
 
     @Test
     public void testParseT_HIACBL() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tHIACBL"), is(true));
@@ -340,79 +239,8 @@ public class ParseCBSMessageTest {
     }
 
     @Test
-    public void testParseT_IPCDATE() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPCDATE"), is(true));
-        assertThat(fieldMap.get("tIPCDATE"), is((Object) T_IPCDATE));
-        assertThat(fieldMap.get("tIPCDATE"), instanceOf(String.class));
-    }
-
-    @Test
-    public void testParseT_IPTD_Null() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTD"), is(true));
-        assertThat(fieldMap.get("tIPTD"), nullValue());
-    }
-
-
-    @Test
-    public void testParseT_IPTD() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        String testJson = "{\"tIPTD\":151021}";
-        Map<String, Object> fieldMap = parseMessage.parse(testJson);
-        assertThat(fieldMap.containsKey("tIPTD"), is(true));
-        assertThat(fieldMap.get("tIPTD"), is((Object)"2015-10-21"));
-        assertThat(fieldMap.get("tIPTD"), instanceOf(String.class));
-    }
-
-    @Test
-    public void testParseT_IPTXNARR() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse narative
-        String testJson = "{\"tIPTXNARR\":\"Narative\"}";
-        Map<String, Object> fieldMap = parseMessage.parse(testJson);
-        assertThat(fieldMap.containsKey("tIPTXNARR"), is(true));
-        assertThat(fieldMap.get("tIPTXNARR"), is((Object)"Narative"));
-        assertThat(fieldMap.get("tIPTXNARR"), instanceOf(String.class));
-    }
-
-    @Test
-    public void testParseT_IPTXNARR_Null() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse narative
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTXNARR"), is(true));
-        assertThat(fieldMap.get("tIPTXNARR"), nullValue());
-    }
-
-    @Test
-    public void testParseFullMessage() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse narative
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("fullMessage"), is(true));
-        assertThat(fieldMap.get("fullMessage"), is((Object)expectedJSON));
-        assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
-    }
-
-    @Test
-    public void testParseAnotherValidMessage() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse narative
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON2);
-        assertThat(fieldMap.containsKey("fullMessage"), is(true));
-        assertThat(fieldMap.get("fullMessage"), is((Object)expectedJSON2));
-        assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
-    }
-
-    @Test
     public void testParseNonJSONMessage() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         final TridentTuple tuple = mock(TridentTuple.class);
         // prime pump of tuple
         String badMessage = "Not valid JSON";
@@ -424,7 +252,7 @@ public class ParseCBSMessageTest {
         ArgumentCaptor<Values> values = ArgumentCaptor.forClass(Values.class);
         verify(collector).emit(values.capture());
         assertThat(values, notNullValue());
-        assertThat(values.getValue().size(), is(13));
+        assertThat(values.getValue().size(), is(5));
         assertTrue(isAllNulls(values.getAllValues()));
     }
 
@@ -437,7 +265,6 @@ public class ParseCBSMessageTest {
         }
         return true;
     }
-
 
     private TridentTuple givenJSONTuple() {
         TridentTuple mockTuple = mock(TridentTuple.class);
@@ -453,19 +280,12 @@ public class ParseCBSMessageTest {
     private List<Object> thenMessageValues() {
         Values expectedValuesFromMessage = new Values(
                 SEQNUM,
-                T_IPTETIME,
-                T_IPPBR,
                 T_IPPSTEM,
                 T_IPTTST,
-                T_IPTCLCDE,
-                T_IPTAM,
-                T_IPCURCDE,
+                T_IPTCLASS,
                 T_HIACBL,
-                T_IPCDATE,
-                T_IPTD,
-                T_IPTXNARR,
-                expectedJSON
-        );
+                T_IPTAM
+         );
         return expectedValuesFromMessage;
     }
 

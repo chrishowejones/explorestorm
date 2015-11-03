@@ -19,8 +19,8 @@ public class CreateAccountTxnRowKey extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        Long accountNumber = tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM);
-        String transactionDate = tuple.getStringByField(ParseCBSMessage.FIELD_T_IPTD);
+        Long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM);
+        String transactionDate = tuple.getStringByField(CBSMessageFields.FIELD_T_IPTD);
         String rowKey = Long.toString(accountNumber) + "-" + transactionDate;
         collector.emit(new Values(rowKey));
     }

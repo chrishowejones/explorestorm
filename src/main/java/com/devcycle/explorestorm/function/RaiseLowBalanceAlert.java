@@ -1,7 +1,6 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
-import com.devcycle.explorestorm.topologies.BalanceAlertTopology;
 import com.devcycle.explorestorm.topologies.OCISDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +9,19 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Created by chris howe-jones on 02/11/15.
  */
 public class RaiseLowBalanceAlert extends BaseFunction {
 
-    private Logger LOG = LoggerFactory.getLogger(RaiseLowBalanceAlert.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RaiseLowBalanceAlert.class);
+    private static final Integer[] VALID_TXN_CLASS_ARRAY = {6, 10, 13, 17, 20};
+    private static final HashSet<Integer> VALID_TRANSACTION_CLASSES = new HashSet<>(Arrays.asList(VALID_TXN_CLASS_ARRAY));
+    private static final Integer[] DEBIT_SO_TYPES_ARRAY = {2269, 2270, 2503, 2505, 3037, 3039};
+    private static final HashSet<Integer> DEBIT_STANDING_ORDER_TYPES = new HashSet<>(Arrays.asList(DEBIT_SO_TYPES_ARRAY));
 
     /**
      * Raises a low balance alert
@@ -26,18 +31,43 @@ public class RaiseLowBalanceAlert extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        BigDecimal currentBalance = (BigDecimal)tuple.getValueByField(ParseCBSMessage.FIELD_T_HIACBL);
+        final BigDecimal currentBalance = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL);
         LOG.trace("CurrentBalance = " + currentBalance.toString());
-        String thresholdString = tuple.getStringByField(OCISDetails.THRESHOLD.getValue());
+        final String thresholdString = tuple.getStringByField(OCISDetails.THRESHOLD.getValue());
+        final long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM);
+        final String accountNumberStr = Long.toString(accountNumber);
+        final BigDecimal transactionAmount = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM);
+        final int transactionClass = tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS);
+        final int transactionType = tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST);
+        final boolean isDebit = isDebit(transactionClass, transactionType);
+        Values alert = raiseAlert(isDebit, currentBalance, thresholdString, accountNumberStr, transactionAmount);
+        collector.emit(alert);
+    }
+
+    boolean isDebit(int transactionClass, int transactionType) {
+        return VALID_TRANSACTION_CLASSES.contains(transactionClass) ||
+                isStandingOrderDebit(transactionClass, transactionType);
+    }
+
+    boolean isStandingOrderDebit(int transactionClass, int transactionType) {
+        return transactionClass == 15 && DEBIT_STANDING_ORDER_TYPES.contains(transactionType);
+    }
+
+    private Values raiseAlert(boolean isDebit, BigDecimal currentBalance, String thresholdString, String accountNumberStr, BigDecimal transactionAmount) {
         Values alert = new Values();
-        long accountNumber = tuple.getLongByField(ParseCBSMessage.FIELD_T_IPPSTEM);
-        alert.add(Long.toString(accountNumber));
-        if (currentBalance.compareTo(new BigDecimal(thresholdString)) < 0) {
-            final String alertMessage = "balance is under expected threshold|" + currentBalance;
+        alert.add(accountNumberStr);
+        final BigDecimal threshold = new BigDecimal(thresholdString);
+        if (isDebit && currentBalance.compareTo(threshold) < 0
+                && amountTippedBalance(transactionAmount, currentBalance, threshold)) {
+            final String alertMessage = accountNumberStr + "|balance is under expected threshold|" + currentBalance;
             alert.add(alertMessage);
         } else {
             alert.add(null);
         }
-        collector.emit(alert);
+        return alert;
+    }
+
+    private boolean amountTippedBalance(BigDecimal transactionAmount, BigDecimal currentBalance, BigDecimal threshold) {
+        return currentBalance.add(transactionAmount).compareTo(threshold) >= 0;
     }
 }

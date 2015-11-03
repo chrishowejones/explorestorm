@@ -9,15 +9,12 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
-import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
 import com.devcycle.explorestorm.function.*;
-import com.devcycle.explorestorm.mapper.ExploreMessageValueMapper;
 import com.devcycle.explorestorm.mapper.OCISRowToValueMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
 import org.apache.storm.hbase.bolt.mapper.HBaseProjectionCriteria;
 import org.apache.storm.hbase.bolt.mapper.HBaseValueMapper;
-import org.apache.storm.hbase.bolt.mapper.SimpleHBaseMapper;
 import org.apache.storm.hbase.trident.mapper.SimpleTridentHBaseMapper;
 import org.apache.storm.hbase.trident.state.HBaseQuery;
 import org.apache.storm.hbase.trident.state.HBaseState;
@@ -162,10 +159,11 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(),
-                        new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
-                .each(new Fields(ParseCBSMessage.FIELD_SEQNUM, ParseCBSMessage.FIELD_T_IPPSTEM, ParseCBSMessage.FIELD_T_HIACBL),
+                        new ParseAlertCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseAlertCBSMessage.getEmittedFields())
+                .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_T_IPPSTEM, CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPTAM,
+                                CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST),
                         new FilterNull())
-                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
+                .each(new Fields(CBSMessageFields.FIELD_T_IPPSTEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
                 .each(new Fields(ROW_KEY), new ExploreLogFilter(this.getClass().getName()));
 
         StateFactory factory = new HBaseStateFactory(options);
@@ -178,8 +176,13 @@ public class BalanceAlertTopology extends BaseExploreTopology {
                 .each(new Fields(outputFields),
                         new ExploreLogFilter(this.getClass().getName() + " - from HBase :"))
                 .each(new Fields(OCISDetails.THRESHOLD.getValue()), new FilterNull())
-                .each(new Fields(ParseCBSMessage.FIELD_T_HIACBL, ParseCBSMessage.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue()), new RaiseLowBalanceAlert(), new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT))
-                .each(new Fields(ParseCBSMessage.FIELD_T_IPPSTEM, LOW_BALANCE_ALERT), new FilterNull());
+                .each(new Fields(CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue(), CBSMessageFields.FIELD_T_IPTAM,
+                                CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST),
+                        new RaiseLowBalanceAlert(), new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT))
+                .each(new Fields(CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue(), CBSMessageFields.FIELD_T_IPTAM,
+                        CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST,
+                        ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new ExploreLogFilter(this.getClass().getName() + " - from raise alert :"))
+                .each(new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new FilterNull());
 
         buildKafkaSink(stream);
 
@@ -232,7 +235,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     private List<String> buildOutputFields(Fields columnFields) {
         String[] fieldsArray =
-                {ROW_KEY, ParseCBSMessage.FIELD_T_HIACBL, ParseCBSMessage.FIELD_T_IPTAM, ParseCBSMessage.FIELD_T_IPTTST};
+                {ROW_KEY, CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPTAM, CBSMessageFields.FIELD_T_IPTTST};
         List<String> outputFields = buildColumnFields(columnFields, fieldsArray);
         return outputFields;
     }
