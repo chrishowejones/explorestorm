@@ -9,7 +9,7 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.function.CBSMessageFields;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;

@@ -12,6 +12,7 @@ import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.function.*;
 import com.devcycle.explorestorm.mapper.OCISRowToValueMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
 import org.apache.storm.hbase.bolt.mapper.HBaseProjectionCriteria;
 import org.apache.storm.hbase.bolt.mapper.HBaseValueMapper;

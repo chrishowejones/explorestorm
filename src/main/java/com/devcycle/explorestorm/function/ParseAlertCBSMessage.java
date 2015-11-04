@@ -3,6 +3,7 @@ package com.devcycle.explorestorm.function;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.devcycle.explorestorm.message.MessageTuple;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.util.JSONParser;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -3,6 +3,7 @@ package com.devcycle.explorestorm.function;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.devcycle.explorestorm.message.MessageTuple;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.util.JSONParser;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +16,7 @@ import storm.trident.tuple.TridentTuple;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,15 +42,29 @@ public class ParseCBSMessage extends BaseFunction {
             CBSMessageFields.FIELD_FULL_MESSAGE
     );
     private final JSONParser jsonParser = new JSONParser();
+    private List<String> fields;
     private String fieldJsonString;
+    private CBSMessageFields cbsMessageFields = new CBSMessageFields();
 
     /**
      * Create a ParseCBSMessage function with the field name of the CBS message in the Trident Tuple
      *
      * @param fieldJsonString - tuple field name of input JSON message.
      */
+    @Deprecated
     public ParseCBSMessage(String fieldJsonString) {
-        this.fieldJsonString = fieldJsonString;
+        initialise(fieldJsonString);
+    }
+
+    /**
+     * Create a ParseCBSMessage function with the field name of the CBS message and the list of fields to parse
+     *
+     * @param fieldJsonString field name to use to read the json string
+     * @param fields to parse from the json string
+     */
+    public ParseCBSMessage(String fieldJsonString, List<String> fields) {
+        initialise(fieldJsonString);
+        this.fields = fields;
     }
 
     /**
@@ -74,10 +90,6 @@ public class ParseCBSMessage extends BaseFunction {
         collector.emit(expectedValuesFromMessage);
     }
 
-    Values parseToTuples(String jsonMessage) {
-        return new MessageTuple(parse(jsonMessage)).getValues();
-    }
-
     /**
      * Parse a String representation of the JSON to a Map of field names and values for the fields of interest
      * in the JSON String.
@@ -86,12 +98,13 @@ public class ParseCBSMessage extends BaseFunction {
      * @return map of parsed fields and values
      */
     public Map<String, Object> parse(String jsonMessage) {
-        Map<String, Object> fieldsMap = new LinkedHashMap<>();
+        Map<String, Object> fieldsMap = null;
 
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(jsonMessage);
-            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_SEQNUM));
+            fieldsMap = buildFieldsMap(jsonObject);
+//            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_SEQNUM));
             fieldsMap.put(CBSMessageFields.FIELD_TIME, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TIME));
             fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_ACCOUNT_NUMBER));
             fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_TYPE));
@@ -108,6 +121,33 @@ public class ParseCBSMessage extends BaseFunction {
             fieldsMap = populateNullValues();
         }
         return fieldsMap;
+    }
+
+    private Map<String, Object> buildFieldsMap(JSONObject jsonObject) throws JSONException {
+        Map<String, Object> fieldsMap = new LinkedHashMap<>();
+        if (fields != null) {
+            for (String field : fields) {
+                fieldsMap.put(field, parseField(jsonObject, field, cbsMessageFields.getType(field)));
+            }
+        }
+        return fieldsMap;
+    }
+
+    private Object parseField(JSONObject jsonObject, String key, Class type) throws JSONException {
+
+        return jsonParser.parseLong(jsonObject, key);
+    }
+
+    Values parseToTuples(String jsonMessage) {
+        return new MessageTuple(parse(jsonMessage)).getValues();
+    }
+
+    List<String> getFields() {
+        return fields;
+    }
+
+    private void initialise(String fieldJsonString) {
+        this.fieldJsonString = fieldJsonString;
     }
 
     private Map<String, Object> populateNullValues() {
