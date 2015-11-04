@@ -28,8 +28,7 @@ public class ParseCBSMessage extends BaseFunction {
     private static final Fields EMITTED_FIELDS = new Fields(
             CBSMessageFields.FIELD_SEQNUM,
             CBSMessageFields.FIELD_TIME,
-            CBSMessageFields.FIELD_BRANCH_CODE,
-            CBSMessageFields.FIELD_PARENT_STEM,
+            CBSMessageFields.FIELD_ACCOUNT_NUMBER,
             CBSMessageFields.FIELD_TXN_TYPE,
             CBSMessageFields.FIELD_TXN_CODE,
             CBSMessageFields.FIELD_TXN_AMOUNT,
@@ -115,8 +114,7 @@ public class ParseCBSMessage extends BaseFunction {
         HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
         fieldsMap.put(CBSMessageFields.FIELD_TIME, null);
-        fieldsMap.put(CBSMessageFields.FIELD_BRANCH_CODE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_PARENT_STEM, null);
+        fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, null);
         fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, null);
         fieldsMap.put(CBSMessageFields.FIELD_TXN_CODE, null);
         fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, null);

@@ -411,7 +411,7 @@ public class ParseCBSMessageTest {
         ArgumentCaptor<Values> values = ArgumentCaptor.forClass(Values.class);
         verify(collector).emit(values.capture());
         assertThat(values, notNullValue());
-        assertThat(values.getValue().size(), is(13));
+        assertThat(values.getValue().size(), is(12));
         assertTrue(isAllNulls(values.getAllValues()));
     }
 

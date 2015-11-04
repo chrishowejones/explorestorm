@@ -24,7 +24,7 @@ public class ParseAlertCBSMessage extends BaseFunction {
     private static final Logger LOG = LoggerFactory.getLogger(ParseAlertCBSMessage.class);
     private static final Fields EMITTED_FIELDS = new Fields(
             CBSMessageFields.FIELD_SEQNUM,
-            CBSMessageFields.FIELD_PARENT_STEM,
+            CBSMessageFields.FIELD_ACCOUNT_NUMBER,
             CBSMessageFields.FIELD_TXN_TYPE,
             CBSMessageFields.FIELD_TXN_CLASS,
             CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
@@ -94,7 +94,7 @@ public class ParseAlertCBSMessage extends BaseFunction {
     private Map<String, Object> populateNullValues() {
         HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_PARENT_STEM, null);
+        fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, null);
         fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, null);
         fieldsMap.put(CBSMessageFields.FIELD_TXN_CLASS, null);
         fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, null);

@@ -153,15 +153,14 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
-                                new String[]{CBSMessageFields.FIELD_PARENT_STEM, CBSMessageFields.FIELD_TXN_DATE}))
+                                new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))
                 .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
         Fields transformedFields = new Fields(
                 CBSMessageFields.FIELD_SEQNUM,
                 CBSMessageFields.FIELD_TIME,
-                CBSMessageFields.FIELD_BRANCH_CODE,
-                CBSMessageFields.FIELD_PARENT_STEM,
+                CBSMessageFields.FIELD_ACCOUNT_NUMBER,
                 CBSMessageFields.FIELD_TXN_TYPE,
                 CBSMessageFields.FIELD_TXN_CODE,
                 CBSMessageFields.FIELD_TXN_AMOUNT,

@@ -66,14 +66,14 @@ public class TestJson {
         assertThat(line.getInt("SEQNUM"), is(1));
         assertThat(line.getLong("tIPTETIME"), is(153236L));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(11L));
+        assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
         assertThat(line.getLong("tIPTAM"), is(50L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(10000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.getInt("tIPTD"), is(151027));
+        assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 
@@ -84,14 +84,14 @@ public class TestJson {
         assertThat(line.length(), is(1240));
         assertThat(line.getInt("SEQNUM"), is(2));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(11L));
+        assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
         assertThat(line.getLong("tIPTAM"), is(50L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(10000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.getInt("tIPTD"), is(151027));
+        assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 
@@ -103,14 +103,14 @@ public class TestJson {
         assertThat(line.length(), is(1241));
         assertThat(line.getInt("SEQNUM"), is(3));
         assertThat(line.getInt("tIPPBR"), is(556111));
-        assertThat(line.getLong("tIPPSTEM"), is(11L));
+        assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(201L));
         assertThat(line.getLong("tIPTCLCDE"), is(65737L));
         assertThat(line.getLong("tIPTAM"), is(5000L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(3000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
-        assertThat(line.getInt("tIPTD"), is(151027));
+        assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
     }
 

@@ -18,7 +18,7 @@ public class CreateOCISAccountRowKey extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        Long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_PARENT_STEM);
+        Long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
 
         String rowKey = Long.toString(accountNumber);
         collector.emit(new Values(rowKey));
