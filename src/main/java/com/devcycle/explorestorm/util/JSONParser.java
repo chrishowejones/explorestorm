@@ -7,16 +7,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class JSONParser implements Serializable {
+
     private static final Logger LOG = LoggerFactory.getLogger(JSONParser.class);
 
     public String parseString(JSONObject json, String key) throws JSONException {
         String value = null;
-        if (json.has(key) && !json.isNull(key)) {
+        if (isValidKey(json, key)) {
             value = json.getString(key);
         }
         return value;
@@ -24,7 +26,7 @@ public class JSONParser implements Serializable {
 
     public String parseDateString(JSONObject json, String key) throws JSONException {
         String dateString = null;
-        if (json.has(key) && !json.isNull(key)) {
+        if (isValidKey(json, key)) {
             String yymmdd = json.getString(key);
             SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyMMdd");
             try {
@@ -40,7 +42,7 @@ public class JSONParser implements Serializable {
 
     public BigDecimal parseBigDecimal(JSONObject json, String key) throws JSONException {
         BigDecimal bigDecimal = null;
-        if (json.has(key) && !json.isNull(key)) {
+        if (isValidKey(json, key)) {
             String numberStringValue = json.getString(key).trim();
             String bigDecimalString = buildBigDecimalString(numberStringValue);
             bigDecimal = new BigDecimal(bigDecimalString).setScale(2);
@@ -69,16 +71,20 @@ public class JSONParser implements Serializable {
 
     public Long parseLong(JSONObject json, String key) throws JSONException {
         Long returnLong = null;
-        if (json.has(key) && !json.isNull(key))
+        if (isValidKey(json, key))
             returnLong = json.getLong(key);
         return returnLong;
     }
 
     public Integer parseInt(JSONObject json, String key) throws JSONException {
         Integer returnInt = null;
-        if (json.has(key) && !json.isNull(key))
+        if (isValidKey(json, key))
             returnInt = json.getInt(key);
         return returnInt;
+    }
+
+    private boolean isValidKey(JSONObject json, String key) {
+        return json.has(key) && !json.isNull(key);
     }
 
 

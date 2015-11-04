@@ -22,9 +22,8 @@ public class CreateRowKeyTest {
     public void testExecute() {
         CreateAccountTxnRowKey transform = new CreateAccountTxnRowKey();
         TridentTuple tuple = mock(TridentTuple.class);
-        Mockito.when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPPBR)).thenReturn(123);
-        Mockito.when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(987654321L);
-        Mockito.when(tuple.getStringByField(CBSMessageFields.FIELD_T_IPTD)).thenReturn("2015-10-27");
+        Mockito.when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(987654321L);
+        Mockito.when(tuple.getStringByField(CBSMessageFields.FIELD_TXN_DATE)).thenReturn("2015-10-27");
         TridentCollector collector = mock(TridentCollector.class);
         transform.execute(tuple, collector);
 

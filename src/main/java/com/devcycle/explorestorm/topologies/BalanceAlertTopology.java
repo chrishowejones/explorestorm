@@ -154,16 +154,16 @@ public class BalanceAlertTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
         // TODO tidy up this code around column fields and output fields
-        final Fields columnFields = new Fields(OCISDetails.THRESHOLD.getValue());
+        final Fields columnFields = new Fields(OCISDetails.THRESHOLD);
         HBaseState.Options options = buildOptions(columnFields);
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(),
                         new ParseAlertCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseAlertCBSMessage.getEmittedFields())
-                .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_T_IPPSTEM, CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPTAM,
-                                CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST),
+                .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_PARENT_STEM, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT,
+                                CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
                         new FilterNull())
-                .each(new Fields(CBSMessageFields.FIELD_T_IPPSTEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
+                .each(new Fields(CBSMessageFields.FIELD_PARENT_STEM), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
                 .each(new Fields(ROW_KEY), new ExploreLogFilter(this.getClass().getName()));
 
         StateFactory factory = new HBaseStateFactory(options);
@@ -175,12 +175,12 @@ public class BalanceAlertTopology extends BaseExploreTopology {
         stream = stream.stateQuery(state, new Fields(ROW_KEY), new HBaseQuery(), columnFields)
                 .each(new Fields(outputFields),
                         new ExploreLogFilter(this.getClass().getName() + " - from HBase :"))
-                .each(new Fields(OCISDetails.THRESHOLD.getValue()), new FilterNull())
-                .each(new Fields(CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue(), CBSMessageFields.FIELD_T_IPTAM,
-                                CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST),
+                .each(new Fields(OCISDetails.THRESHOLD), new FilterNull())
+                .each(new Fields(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_PARENT_STEM, OCISDetails.THRESHOLD, CBSMessageFields.FIELD_TXN_AMOUNT,
+                                CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
                         new RaiseLowBalanceAlert(), new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT))
-                .each(new Fields(CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPPSTEM, OCISDetails.THRESHOLD.getValue(), CBSMessageFields.FIELD_T_IPTAM,
-                        CBSMessageFields.FIELD_T_IPTCLASS, CBSMessageFields.FIELD_T_IPTTST,
+                .each(new Fields(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_PARENT_STEM, OCISDetails.THRESHOLD, CBSMessageFields.FIELD_TXN_AMOUNT,
+                        CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE,
                         ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new ExploreLogFilter(this.getClass().getName() + " - from raise alert :"))
                 .each(new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new FilterNull());
 
@@ -218,12 +218,12 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     private HBaseState.Options buildOptions(Fields columnFields) {
         SimpleTridentHBaseMapper mapper = new SimpleTridentHBaseMapper().withRowKeyField(ROW_KEY)
-                .withColumnFamily(OCISDetails.CF_THRESHOLD.getValue())
+                .withColumnFamily(OCISDetails.CF_THRESHOLD)
                 .withColumnFields(columnFields);
         HBaseProjectionCriteria projectionCriteria = new HBaseProjectionCriteria();
-        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData(OCISDetails.CF_THRESHOLD.getValue(), OCISDetails.THRESHOLD.getValue()));
+        projectionCriteria.addColumn(new HBaseProjectionCriteria.ColumnMetaData(OCISDetails.CF_THRESHOLD, OCISDetails.THRESHOLD));
         Map<String, Fields> fieldsRequired = new LinkedHashMap<>();
-        fieldsRequired.put(OCISDetails.CF_THRESHOLD.getValue(), columnFields);
+        fieldsRequired.put(OCISDetails.CF_THRESHOLD, columnFields);
         HBaseValueMapper rowToStormValueMapper = new OCISRowToValueMapper(fieldsRequired);
 
         return new HBaseState.Options()
@@ -235,7 +235,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     private List<String> buildOutputFields(Fields columnFields) {
         String[] fieldsArray =
-                {ROW_KEY, CBSMessageFields.FIELD_T_HIACBL, CBSMessageFields.FIELD_T_IPTAM, CBSMessageFields.FIELD_T_IPTTST};
+                {ROW_KEY, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT, CBSMessageFields.FIELD_TXN_TYPE};
         List<String> outputFields = buildColumnFields(columnFields, fieldsArray);
         return outputFields;
     }

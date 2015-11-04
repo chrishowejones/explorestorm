@@ -39,12 +39,12 @@ public class RaiseLowBalanceAlertTest {
         BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
 
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_TXN_AMOUNT)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -71,12 +71,12 @@ public class RaiseLowBalanceAlertTest {
         BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
 
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_TXN_AMOUNT)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -102,12 +102,12 @@ public class RaiseLowBalanceAlertTest {
         BigDecimal transactionAmount = new BigDecimal("10.00").setScale(2);
 
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM)).thenReturn(transactionAmount);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_TXN_AMOUNT)).thenReturn(transactionAmount);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -133,11 +133,11 @@ public class RaiseLowBalanceAlertTest {
         Integer transactionType = 2269;
 
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -162,11 +162,11 @@ public class RaiseLowBalanceAlertTest {
         Integer transactionType = 2268;
 
         String accountNumberString = Long.toString(accountNumber);
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS)).thenReturn(transactionClass);
-        when(tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST)).thenReturn(transactionType);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS)).thenReturn(transactionClass);
+        when(tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE)).thenReturn(transactionType);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -189,9 +189,9 @@ public class RaiseLowBalanceAlertTest {
         long accountNumber = 1234567L;
         String accountNumberString = Long.toString(accountNumber);
 
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);
@@ -214,9 +214,9 @@ public class RaiseLowBalanceAlertTest {
         long accountNumber = 1234567L;
         String accountNumberString = Long.toString(accountNumber);
 
-        when(tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL)).thenReturn(balance);
-        when(tuple.getStringByField(OCISDetails.THRESHOLD.getValue())).thenReturn(threshold);
-        when(tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM)).thenReturn(accountNumber);
+        when(tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE)).thenReturn(balance);
+        when(tuple.getStringByField(OCISDetails.THRESHOLD)).thenReturn(threshold);
+        when(tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER)).thenReturn(accountNumber);
 
         RaiseLowBalanceAlert alertFunction = new RaiseLowBalanceAlert();
         alertFunction.execute(tuple, collector);

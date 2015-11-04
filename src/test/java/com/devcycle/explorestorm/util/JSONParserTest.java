@@ -6,6 +6,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.math.BigInteger;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
@@ -33,4 +35,13 @@ public class JSONParserTest {
         JSONObject jsonObject = new JSONObject(dateJSON);
         assertThat(parser.parseDateString(jsonObject, "datefield"), nullValue());
     }
+
+    @Test
+    public void testParseDate() throws Exception {
+        JSONParser parser = new JSONParser();
+        String dateJSON = "{\"datefield\":\"2015-11-01\"}";
+        JSONObject jsonObject = new JSONObject(dateJSON);
+        assertThat(parser.parseString(jsonObject, "datefield"), is("2015-11-01"));
+    }
+
 }

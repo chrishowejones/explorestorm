@@ -24,11 +24,11 @@ public class ParseAlertCBSMessage extends BaseFunction {
     private static final Logger LOG = LoggerFactory.getLogger(ParseAlertCBSMessage.class);
     private static final Fields EMITTED_FIELDS = new Fields(
             CBSMessageFields.FIELD_SEQNUM,
-            CBSMessageFields.FIELD_T_IPPSTEM,
-            CBSMessageFields.FIELD_T_IPTTST,
-            CBSMessageFields.FIELD_T_IPTCLASS,
-            CBSMessageFields.FIELD_T_HIACBL,
-            CBSMessageFields.FIELD_T_IPTAM
+            CBSMessageFields.FIELD_PARENT_STEM,
+            CBSMessageFields.FIELD_TXN_TYPE,
+            CBSMessageFields.FIELD_TXN_CLASS,
+            CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
+            CBSMessageFields.FIELD_TXN_AMOUNT
     );
     private String fieldJsonString;
 
@@ -78,12 +78,12 @@ public class ParseAlertCBSMessage extends BaseFunction {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(jsonMessage);
-            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_SEQNUM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_T_IPPSTEM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTTST));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLASS, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTCLASS));
-            fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_HIACBL));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_IPTAM));
+            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_SEQNUM));
+            fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_ACCOUNT_NUMBER));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_TYPE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_CLASS, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_CLASS));
+            fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_TXN_AMOUNT));
         } catch (JSONException e) {
             LOG.warn("Error in JSON: " + jsonMessage, e);
             fieldsMap = populateNullValues();
@@ -94,10 +94,10 @@ public class ParseAlertCBSMessage extends BaseFunction {
     private Map<String, Object> populateNullValues() {
         HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLASS, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, null);
+        fieldsMap.put(CBSMessageFields.FIELD_PARENT_STEM, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_CLASS, null);
+        fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, null);
         return fieldsMap;
     }
 }

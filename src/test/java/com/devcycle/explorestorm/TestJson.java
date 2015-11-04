@@ -106,7 +106,7 @@ public class TestJson {
         assertThat(line.getLong("tIPPSTEM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(201L));
         assertThat(line.getLong("tIPTCLCDE"), is(65737L));
-        assertThat(line.getLong("tIPTAM"), is(50L));
+        assertThat(line.getLong("tIPTAM"), is(5000L));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
         assertThat(line.getLong("tHIACBL"), is(3000L));
         assertThat(line.getLong("tIPCDATE"), is(151013L));

@@ -1,14 +1,12 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +24,11 @@ public class ParseCBSMessageTest {
             "\"tLOLGSRCE\":2,\"tLOLODATE\":null,\"tLOPRDTE\":null,\"tLORPDATE\":null,\"tLOBRANCH\":0,\"tLOBRTD\":0," +
             "\"tLONUMBER\":0,\"tLORSUB\":0,\"tLOFORMCD\":0,\"tLOFORMSB\":0,\"tIPTCLCDE\":999,\"tIPTCLASS\":0," +
             "\"tIPCORIND\":0,\"tIPTTST\":123,\"tIPTQUAL\":0,\"tIPTSPACE\":null,\"tIPTID\":0,\"tIPPBR\":2021," +
-            "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":00000000000000,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
+            "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":55611108802234,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
             "\"tIPLTAM\":0,\"tIPTAM\":10000000000,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
             "\"tIPPRTP\":10,\"tIPPABNCD\":0,\"tIPRGPABR\":0,\"tIPPAHOBR\":0,\"tIPPRGOCD\":0,\"tIPSECBR\":0," +
             "\"tIPSECATP\":0,\"tIPSECCDG\":0,\"tIPSECSTM\":0,\"tIPRCVBR\":0,\"tIPRCVAT\":0,\"tIPRCVCD\":0," +
-            "\"tIPRCVST\":0,\"tIPTD\":null,\"tIPLCHOID\":0,\"tHIASDINT\":0,\"tIPPHOIND\":0,\"tIPPROIN\":0,\"tIPPBRIN\":0," +
+            "\"tIPRCVST\":0,\"tIPTD\":\"2015-11-01\",\"tIPLCHOID\":0,\"tHIASDINT\":0,\"tIPPHOIND\":0,\"tIPPROIN\":0,\"tIPPBRIN\":0," +
             "\"tIPPRGIN\":0,\"tIPIBNIN\":0,\"tIPIRGIN\":0,\"tIPREJIN\":1,\"tIPSUSIN\":0,\"tIPEXCIN\":0,\"tIPUNCIN\":0,\"tIPBUSIND\":0," +
             "\"tIPOBSIND\":0,\"tIPINTXNI\":0,\"tIPORIFM\":0,\"tIPDEFTXN\":0,\"tIPDBCRDI\":0,\"tIPCOMMGI\":0,\"tIPACTXNI\":0,\"tIPNSDII\":0," +
             "\"tHIDINDP\":0,\"tIPDINDP\":0,\"tHIACBL\":123456789099,\"tHILTD\":null,\"tHIPBRIND\":0,\"tHIPROIND\":0,\"tHIPIIND\":0,\"tHITAXAMT\":0," +
@@ -43,8 +41,8 @@ public class ParseCBSMessageTest {
             "\"tIPCURCDE\":12,\"tIPSCACII\":0,\"tIPF08\":0,\"tIPPDNOII\":0,\"tIPF09\":0,\"tIPCURCII\":0,\"tIPCRTO\":0,\"tIPDBFDBE\":0,\"tHIUNAINT\":0," +
             "\"tIPDBFLUD\":null,\"tIPHDIAM\":0,\"tIPMKTSEC\":0,\"tIPNOCDUP\":0,\"tIPMKTSEG\":0,\"tIPMKTSGI\":0,\"tIPF24\":\"\",\"tIPF25\":\"\",\"tHIOCHG\":0," +
             "\"tIPF20\":0,\"tIPLWSPB\":\"\",\"tPCPROCID\":\"\",\"tPCLSBTYP\":0,\"tPCTHRDNO\":0,\"tPCACTTME\":0,\"tPCRGSAFF(1)\":0,\"tPCLW\":\"\",\"tTMREJIPT\":0," +
-            "\"tTMICTIPT\":0,\"tTMELTIPT\":0,\"tTMPREVTX\":0,\"tTMPRVCMS\":0,\"tTMELIWSI\":0,\"tTMELIWSO\":0,\"tTMELTFPT\":0,\"tTMELTRPT\":0,\"tIPTETIME\":153236," +
-            "\"tIPCDATE\":151013,\"tIPTETMLS\":55956914,\"TIME\":\"00:00:00.000\",\"tIPITIME\":0,\"tIPOPBR\":0,\"tIPOACTP\":0,\"tIPOCDG\":0,\"tIPOPSTEM\":0," +
+            "\"tTMICTIPT\":0,\"tTMELTIPT\":0,\"tTMPREVTX\":0,\"tTMPRVCMS\":0,\"tTMELIWSI\":0,\"tTMELIWSO\":0,\"tTMELTFPT\":0,\"tTMELTRPT\":0," +
+            "\"tIPCDATE\":\"2015-10-13\",\"tIPTETMLS\":55956914,\"TIME\":\"12:59:59.999\",\"tIPITIME\":0,\"tIPOPBR\":0,\"tIPOACTP\":0,\"tIPOCDG\":0,\"tIPOPSTEM\":0," +
             "\"tIPPRIMAN\":0,\"tIPORTEL\":\"\",\"tIPORBR\":0,\"tIPCBNO\":0,\"tIPBTTXN\":0,\"tIPORPRES\":0,\"tIPPBIN\":0,\"tIPMSIN\":0,\"tIPNBEIN\":0,\"tIPDGIN\":0," +
             "\"tIPCQNIN\":0,\"tIPPREDAT\":0,\"tIP8ACC\":0,\"tIPREJIPM\":0,\"tIPTKTIN\":0,\"tIPCONTXN\":0,\"tIPTRNING\":0,\"tIPATMTXN\":0,\"tIPSPBKCP\":0," +
             "\"tIPITXNSP\":0,\"tIPAUTCBP\":0,\"tIPTXUNAT\":0,\"tIPTREPIN\":0,\"tIPUNSOLM\":0,\"tIPREJMSG\":0,\"tIPEXCMSG\":0,\"tIPCNCTXN\":0,\"tIPUNSTEL\":0," +
@@ -167,18 +165,17 @@ public class ParseCBSMessageTest {
             "\"tIPTCLCDE\":999,\"tIPCURCDE\":12,\"tHIACBL\":123456789099,\"tIPCDATE\":151013,\"IPTD\":\"2015-10-01\""+
              "}";
 
-    public static final Integer SEQNUM = 1;
-    public static final Long T_IPTETIME = 153236L;
-    public static final Integer T_IPPBR = 2021;
-    public static final Long T_IPPSTEM = 987654321L;
+    public static final Long SEQNUM = 1L;
+    public static final String TIME = "12:59:59.999";
     public static final Integer T_IPTTST = 123;
     public static final Integer T_IPTCLCDE = 999;
     public static final BigDecimal T_IPTAM = new BigDecimal("100000000.00").setScale(2);
     public static final Integer T_IPCURCDE = 12;
     public static final BigDecimal T_HIACBL = new BigDecimal("1234567890.99").setScale(2);
     public static final String T_IPCDATE = "2015-10-13";
-    public static final Long T_IPTD = null;
+    public static final String T_IPTD = "2015-11-01";
     public static final String T_IPTXNARR = null;
+    public static final Long ACCNUM = 55611108802234L;
 
     @Test
     public void testExecute() throws Exception {
@@ -201,46 +198,36 @@ public class ParseCBSMessageTest {
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("SEQNUM"), is(true));
         assertThat(fieldMap.get("SEQNUM"), is((Object) SEQNUM));
-        assertThat(fieldMap.get("SEQNUM"), instanceOf(Integer.class));
+        assertThat(fieldMap.get("SEQNUM"), instanceOf(Long.class));
     }
 
     @Test
-    public void testParseT_IPTETIME() {
+    public void testParseTIME() {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
         // check parse time in milliseconds since midnight
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
-        assertThat(fieldMap.get("tIPTETIME"), is((Object) T_IPTETIME));
-        assertThat(fieldMap.get("tIPTETIME"), instanceOf(Long.class));
+        assertThat(fieldMap.containsKey("TIME"), is(true));
+        assertThat(fieldMap.get("TIME"), is((Object) TIME));
+        assertThat(fieldMap.get("TIME"), instanceOf(String.class));
     }
 
     @Test
-    public void testParseT_IPTETIME_Null() {
+    public void testParseTIME_Null() {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        String testJSON = "{\"tIPTETIME\":null}";
+        String testJSON = "{\"TIME\":null}";
         Map<String, Object> fieldMap = parseMessage.parse(testJSON);
-        assertThat(fieldMap.containsKey("tIPTETIME"), is(true));
-        assertThat(fieldMap.get("tIPTETIME"), nullValue());
+        assertThat(fieldMap.containsKey("TIME"), is(true));
+        assertThat(fieldMap.get("TIME"), nullValue());
     }
 
     @Test
-    public void testParseT_IPPBR() {
+    public void testParseACCNUM() {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
         // check parse branch code
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPPBR"), is(true));
-        assertThat(fieldMap.get("tIPPBR"), is((Object) T_IPPBR));
-        assertThat(fieldMap.get("tIPPBR"), instanceOf(Integer.class));
-    }
-
-    @Test
-    public void testParseT_IPPSTEM() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
-        // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPPSTEM"), is(true));
-        assertThat(fieldMap.get("tIPPSTEM"), is((Object) T_IPPSTEM));
-        assertThat(fieldMap.get("tIPPSTEM"), instanceOf(Long.class));
+        assertThat(fieldMap.containsKey("ACCNUM"), is(true));
+        assertThat(fieldMap.get("ACCNUM"), is((Object) ACCNUM));
+        assertThat(fieldMap.get("ACCNUM"), instanceOf(Long.class));
     }
 
     @Test
@@ -353,7 +340,8 @@ public class ParseCBSMessageTest {
     public void testParseT_IPTD_Null() {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
         // check parse account number
-        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
+        String testJson = "{\"tIPTD\":null}";
+        Map<String, Object> fieldMap = parseMessage.parse(testJson);
         assertThat(fieldMap.containsKey("tIPTD"), is(true));
         assertThat(fieldMap.get("tIPTD"), nullValue());
     }
@@ -363,10 +351,9 @@ public class ParseCBSMessageTest {
     public void testParseT_IPTD() {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
         // check parse account number
-        String testJson = "{\"tIPTD\":151021}";
-        Map<String, Object> fieldMap = parseMessage.parse(testJson);
+        Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPTD"), is(true));
-        assertThat(fieldMap.get("tIPTD"), is((Object)"2015-10-21"));
+        assertThat(fieldMap.get("tIPTD"), is((Object)"2015-11-01"));
         assertThat(fieldMap.get("tIPTD"), instanceOf(String.class));
     }
 
@@ -453,9 +440,8 @@ public class ParseCBSMessageTest {
     private List<Object> thenMessageValues() {
         Values expectedValuesFromMessage = new Values(
                 SEQNUM,
-                T_IPTETIME,
-                T_IPPBR,
-                T_IPPSTEM,
+                TIME,
+                ACCNUM,
                 T_IPTTST,
                 T_IPTCLCDE,
                 T_IPTAM,
