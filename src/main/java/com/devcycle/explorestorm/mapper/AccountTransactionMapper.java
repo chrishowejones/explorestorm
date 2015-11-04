@@ -155,7 +155,7 @@ public class AccountTransactionMapper implements TridentHBaseMapper {
     }
 
     private byte[] buildFieldName(String fieldPrefix, Object transactionId) {
-        String fieldName = fieldPrefix + "-" + ((Integer) transactionId).toString();
+        String fieldName = fieldPrefix + "-" + ((Long) transactionId).toString();
         return fieldName.getBytes();
     }
 

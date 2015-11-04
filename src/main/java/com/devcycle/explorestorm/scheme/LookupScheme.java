@@ -32,7 +32,6 @@ public class LookupScheme implements Scheme {
             String [] pieces = lookupEvent.split("\\|");
 
             String rowKey = cleanup(pieces[0]);
-            //String returnColumns = cleanup(pieces[1]);
             return new Values(rowKey);
         } catch (UnsupportedEncodingException ex) {
             LOG.error("UTF-8 not supported", ex);

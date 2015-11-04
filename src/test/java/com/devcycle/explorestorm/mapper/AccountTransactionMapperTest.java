@@ -216,7 +216,7 @@ public class AccountTransactionMapperTest {
         mapper.withColumnFamilies(columnFamilies).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum
-        int seqnum = 123;
+        long seqnum = 123l;
         when(tuple.getValueByField(seqnumField)).thenReturn(seqnum);
         // set account num
         when(tuple.getValueByField(accNumField)).thenReturn(accNumValue);
@@ -257,7 +257,7 @@ public class AccountTransactionMapperTest {
         mapper.withColumnFamilies(columnFamilies).withColumnFieldPrefixes(columnFamily, columnFieldPrefixesCF1);
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum
-        int seqnum = 123;
+        long seqnum = 123L;
         when(tuple.getValueByField(seqnumField)).thenReturn(seqnum);
         when(tuple.getValueByField(accNumField)).thenReturn(accNumValue);
         when(tuple.getValueByField(txnDate)).thenReturn(txnDateValue);
@@ -313,7 +313,7 @@ public class AccountTransactionMapperTest {
 
         TridentTuple tuple = mock(TridentTuple.class);
         // set seqnum
-        int seqnum = 123;
+        long seqnum = 123L;
         when(tuple.getValueByField(seqnumField)).thenReturn(seqnum);
         when(tuple.getValueByField(accNumField)).thenReturn(accNumValue);
         when(tuple.getValueByField(txnDate)).thenReturn(txnDateValue);
@@ -356,9 +356,4 @@ public class AccountTransactionMapperTest {
         return bb.getLong();
     }
 
-    public static byte[] toBytes(Long l) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
-        buffer.putLong(l);
-        return buffer.array();
-    }
 }

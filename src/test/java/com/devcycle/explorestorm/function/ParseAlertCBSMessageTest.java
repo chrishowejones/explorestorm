@@ -7,7 +7,6 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +24,8 @@ import static org.mockito.Mockito.when;
  */
 public class ParseAlertCBSMessageTest {
 
-    public static final Integer SEQNUM = 1;
-    public static final Long T_IPPSTEM = 987654321L;
+    public static final Long SEQNUM = 1L;
+    public static final Long ACCNUM = 55611108802234L;
     public static final BigDecimal T_HIACBL = new BigDecimal("1234567890.99").setScale(2);
     private static final Integer T_IPTCLASS = 15;
     private static final Integer T_IPTTST = 2269;
@@ -36,7 +35,7 @@ public class ParseAlertCBSMessageTest {
             "\"tLOLGSRCE\":2,\"tLOLODATE\":null,\"tLOPRDTE\":null,\"tLORPDATE\":null,\"tLOBRANCH\":0,\"tLOBRTD\":0," +
             "\"tLONUMBER\":0,\"tLORSUB\":0,\"tLOFORMCD\":0,\"tLOFORMSB\":0,\"tIPTCLCDE\":999,\"tIPTCLASS\":15," +
             "\"tIPCORIND\":0,\"tIPTTST\":2269,\"tIPTQUAL\":0,\"tIPTSPACE\":null,\"tIPTID\":0,\"tIPPBR\":2021," +
-            "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":00000000000000,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
+            "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":55611108802234,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
             "\"tIPLTAM\":0,\"tIPTAM\":3099,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
             "\"tIPPRTP\":10,\"tIPPABNCD\":0,\"tIPRGPABR\":0,\"tIPPAHOBR\":0,\"tIPPRGOCD\":0,\"tIPSECBR\":0," +
             "\"tIPSECATP\":0,\"tIPSECCDG\":0,\"tIPSECSTM\":0,\"tIPRCVBR\":0,\"tIPRCVAT\":0,\"tIPRCVCD\":0," +
@@ -195,7 +194,7 @@ public class ParseAlertCBSMessageTest {
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("SEQNUM"), is(true));
         assertThat(fieldMap.get("SEQNUM"), is((Object) SEQNUM));
-        assertThat(fieldMap.get("SEQNUM"), instanceOf(Integer.class));
+        assertThat(fieldMap.get("SEQNUM"), instanceOf(Long.class));
     }
 
     @Test
@@ -203,9 +202,9 @@ public class ParseAlertCBSMessageTest {
         ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
-        assertThat(fieldMap.containsKey("tIPPSTEM"), is(true));
-        assertThat(fieldMap.get("tIPPSTEM"), is((Object) T_IPPSTEM));
-        assertThat(fieldMap.get("tIPPSTEM"), instanceOf(Long.class));
+        assertThat(fieldMap.containsKey("ACCNUM"), is(true));
+        assertThat(fieldMap.get("ACCNUM"), is((Object) ACCNUM));
+        assertThat(fieldMap.get("ACCNUM"), instanceOf(Long.class));
     }
 
     @Test
@@ -280,7 +279,7 @@ public class ParseAlertCBSMessageTest {
     private List<Object> thenMessageValues() {
         Values expectedValuesFromMessage = new Values(
                 SEQNUM,
-                T_IPPSTEM,
+                ACCNUM,
                 T_IPTTST,
                 T_IPTCLASS,
                 T_HIACBL,

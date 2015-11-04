@@ -31,14 +31,14 @@ public class RaiseLowBalanceAlert extends BaseFunction {
      */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
-        final BigDecimal currentBalance = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_T_HIACBL);
+        final BigDecimal currentBalance = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
         LOG.trace("CurrentBalance = " + currentBalance.toString());
-        final String thresholdString = tuple.getStringByField(OCISDetails.THRESHOLD.getValue());
-        final long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_T_IPPSTEM);
+        final String thresholdString = tuple.getStringByField(OCISDetails.THRESHOLD);
+        final long accountNumber = tuple.getLongByField(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
         final String accountNumberStr = Long.toString(accountNumber);
-        final BigDecimal transactionAmount = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_T_IPTAM);
-        final int transactionClass = tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTCLASS);
-        final int transactionType = tuple.getIntegerByField(CBSMessageFields.FIELD_T_IPTTST);
+        final BigDecimal transactionAmount = (BigDecimal)tuple.getValueByField(CBSMessageFields.FIELD_TXN_AMOUNT);
+        final int transactionClass = tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS);
+        final int transactionType = tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE);
         final boolean isDebit = isDebit(transactionClass, transactionType);
         Values alert = raiseAlert(isDebit, currentBalance, thresholdString, accountNumberStr, transactionAmount);
         collector.emit(alert);

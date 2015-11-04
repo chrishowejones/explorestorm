@@ -153,23 +153,22 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
-                                new String[]{CBSMessageFields.FIELD_T_IPPSTEM, CBSMessageFields.FIELD_T_IPTD}))
+                                new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))
                 .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
         Fields transformedFields = new Fields(
                 CBSMessageFields.FIELD_SEQNUM,
-                CBSMessageFields.FIELD_T_IPTETIME,
-                CBSMessageFields.FIELD_T_IPPBR,
-                CBSMessageFields.FIELD_T_IPPSTEM,
-                CBSMessageFields.FIELD_T_IPTTST,
-                CBSMessageFields.FIELD_T_IPTCLCDE,
-                CBSMessageFields.FIELD_T_IPTAM,
-                CBSMessageFields.FIELD_T_IPCURCDE,
-                CBSMessageFields.FIELD_T_HIACBL,
-                CBSMessageFields.FIELD_T_IPCDATE,
-                CBSMessageFields.FIELD_T_IPTD,
-                CBSMessageFields.FIELD_T_IPTXNARR,
+                CBSMessageFields.FIELD_TIME,
+                CBSMessageFields.FIELD_ACCOUNT_NUMBER,
+                CBSMessageFields.FIELD_TXN_TYPE,
+                CBSMessageFields.FIELD_TXN_CODE,
+                CBSMessageFields.FIELD_TXN_AMOUNT,
+                CBSMessageFields.FIELD_CURRENCY_CDE,
+                CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
+                CBSMessageFields.FIELD_CURRENT_DATE,
+                CBSMessageFields.FIELD_TXN_DATE,
+                CBSMessageFields.FIELD_TXN_NARRATIVE,
                 CBSMessageFields.FIELD_FULL_MESSAGE,
                 ROW_KEY_FIELD
         );
@@ -245,15 +244,15 @@ public class PersistCBSTopology extends BaseExploreTopology {
     private List<String> getFieldsToPersistForAccountTxn() {
         List<String> fieldsToPersist = new ArrayList<>();
         fieldsToPersist.add(CBSMessageFields.FIELD_SEQNUM);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTETIME);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTTST);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTCLCDE);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTAM);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPCURCDE);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_HIACBL);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPCDATE);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTD);
-        fieldsToPersist.add(CBSMessageFields.FIELD_T_IPTXNARR);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TIME);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TXN_TYPE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TXN_CODE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TXN_AMOUNT);
+        fieldsToPersist.add(CBSMessageFields.FIELD_CURRENCY_CDE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_CURRENT_DATE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TXN_DATE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_TXN_NARRATIVE);
         return fieldsToPersist;
     }
 

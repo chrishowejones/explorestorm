@@ -27,17 +27,16 @@ public class ParseCBSMessage extends BaseFunction {
     private static final Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
     private static final Fields EMITTED_FIELDS = new Fields(
             CBSMessageFields.FIELD_SEQNUM,
-            CBSMessageFields.FIELD_T_IPTETIME,
-            CBSMessageFields.FIELD_T_IPPBR,
-            CBSMessageFields.FIELD_T_IPPSTEM,
-            CBSMessageFields.FIELD_T_IPTTST,
-            CBSMessageFields.FIELD_T_IPTCLCDE,
-            CBSMessageFields.FIELD_T_IPTAM,
-            CBSMessageFields.FIELD_T_IPCURCDE,
-            CBSMessageFields.FIELD_T_HIACBL,
-            CBSMessageFields.FIELD_T_IPCDATE,
-            CBSMessageFields.FIELD_T_IPTD,
-            CBSMessageFields.FIELD_T_IPTXNARR,
+            CBSMessageFields.FIELD_TIME,
+            CBSMessageFields.FIELD_ACCOUNT_NUMBER,
+            CBSMessageFields.FIELD_TXN_TYPE,
+            CBSMessageFields.FIELD_TXN_CODE,
+            CBSMessageFields.FIELD_TXN_AMOUNT,
+            CBSMessageFields.FIELD_CURRENCY_CDE,
+            CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
+            CBSMessageFields.FIELD_CURRENT_DATE,
+            CBSMessageFields.FIELD_TXN_DATE,
+            CBSMessageFields.FIELD_TXN_NARRATIVE,
             CBSMessageFields.FIELD_FULL_MESSAGE
     );
     private final JSONParser jsonParser = new JSONParser();
@@ -92,18 +91,17 @@ public class ParseCBSMessage extends BaseFunction {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(jsonMessage);
-            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_SEQNUM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTETIME, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_T_IPTETIME));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPPBR, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPPBR));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_T_IPPSTEM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTTST));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLCDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPTCLCDE));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_IPTAM));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPCURCDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_T_IPCURCDE));
-            fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_T_HIACBL));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPCDATE, jsonParser.parseDateString(jsonObject, CBSMessageFields.FIELD_T_IPCDATE));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTD, jsonParser.parseDateString(jsonObject, CBSMessageFields.FIELD_T_IPTD));
-            fieldsMap.put(CBSMessageFields.FIELD_T_IPTXNARR, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_T_IPTXNARR));
+            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_SEQNUM));
+            fieldsMap.put(CBSMessageFields.FIELD_TIME, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TIME));
+            fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_ACCOUNT_NUMBER));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_TYPE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_CODE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_CODE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_TXN_AMOUNT));
+            fieldsMap.put(CBSMessageFields.FIELD_CURRENCY_CDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_CURRENCY_CDE));
+            fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE));
+            fieldsMap.put(CBSMessageFields.FIELD_CURRENT_DATE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_CURRENT_DATE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_DATE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TXN_DATE));
+            fieldsMap.put(CBSMessageFields.FIELD_TXN_NARRATIVE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TXN_NARRATIVE));
             fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
             LOG.warn("Error in JSON: " + jsonMessage, e);
@@ -115,17 +113,16 @@ public class ParseCBSMessage extends BaseFunction {
     private Map<String, Object> populateNullValues() {
         HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTETIME, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPPBR, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPPSTEM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTTST, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTCLCDE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTAM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPCURCDE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_HIACBL, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPCDATE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTD, null);
-        fieldsMap.put(CBSMessageFields.FIELD_T_IPTXNARR, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TIME, null);
+        fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_CODE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, null);
+        fieldsMap.put(CBSMessageFields.FIELD_CURRENCY_CDE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_CURRENT_DATE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_DATE, null);
+        fieldsMap.put(CBSMessageFields.FIELD_TXN_NARRATIVE, null);
         fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, null);
         return fieldsMap;
     }

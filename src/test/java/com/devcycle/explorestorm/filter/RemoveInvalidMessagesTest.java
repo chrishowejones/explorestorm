@@ -35,16 +35,16 @@ public class RemoveInvalidMessagesTest {
     @Test
     public void testValidMessage() {
         final String seqnum = "SEQNUM";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( seqnum, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(true));
     }
 
@@ -80,177 +80,126 @@ public class RemoveInvalidMessagesTest {
     @Test
     public void testInvalidMessageNoSeqNum() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields(tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields(ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
     public void testInvalidMessageNullSeqNum() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields(tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields(ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(null);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
-    public void testInvalidMessageMissingtIPPBR() {
+    public void testInvalidMessageMissingACCNUM() {
         final String seqnum = "SEQNUM";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        final String tIPPBR = "tIPPBR";
-        Fields fields = new Fields( seqnum, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( seqnum, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] {ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
-    public void testInvalidMessageNulltIPPBR() {
+    public void testInvalidMessageNullACCNUM() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( seqnum, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(null);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(null);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
-        assertThat(filter.isKeep(tuple), is(false));
-    }
-
-    @Test
-    public void testInvalidMessageMissingtIPPSTEM() {
-        final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
-        final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPTD);
-        when(tuple.getFields()).thenReturn(fields);
-        when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
-        when(tuple.size()).thenReturn(4);
-
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
-        assertThat(filter.isKeep(tuple), is(false));
-    }
-
-    @Test
-    public void testInvalidMessageNulltIPPSTEM() {
-        final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
-        final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPPSTEM, tIPTD);
-        when(tuple.getFields()).thenReturn(fields);
-        when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(null);
-        when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-27");
-        when(tuple.size()).thenReturn(4);
-
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
     public void testInvalidMessageMissingtIPTD() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPPSTEM);
+        Fields fields = new Fields( seqnum, ACCNUM);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
     public void testInvalidMessageNulltIPTD() {
         final String seqnum = "SEQNUM";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( seqnum, tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( seqnum, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(seqnum)).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn(null);
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(seqnum, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
     public void testInvalidMessageMissingTransactionId() {
         final String txnid = "txnid";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( txnid, tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( txnid, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField("SEQNUM")).thenReturn(123);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
     @Test
     public void testInvalidMessageNullTransactionId() {
         final String txnid = "txnid";
-        final String tIPPBR = "tIPPBR";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( txnid, tIPPBR, tIPPSTEM, tIPTD);
+        Fields fields = new Fields( txnid, ACCNUM, tIPTD);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField("SEQNUM")).thenReturn(123);
         when(tuple.getValueByField(txnid)).thenReturn(null);
-        when(tuple.getValueByField(tIPPBR)).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
         when(tuple.size()).thenReturn(4);
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { tIPPBR, tIPPSTEM, tIPTD });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { ACCNUM, tIPTD });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
@@ -258,18 +207,18 @@ public class RemoveInvalidMessagesTest {
     public void testInvalidMessageMissingKeyField() {
         final String txnid = "txnid";
         final String keyfield1 = "keyfield1";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( txnid, keyfield1, tIPPSTEM);
+        Fields fields = new Fields( txnid, keyfield1, ACCNUM);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(txnid)).thenReturn(123);
         when(tuple.getValueByField("tIPPBR")).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
         when(tuple.size()).thenReturn(4);
 
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, tIPPSTEM });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, ACCNUM });
         assertThat(filter.isKeep(tuple), is(false));
     }
 
@@ -277,19 +226,19 @@ public class RemoveInvalidMessagesTest {
     public void testInvalidMessageNullKeyField() {
         final String txnid = "txnid";
         final String keyfield1 = "keyfield1";
-        final String tIPPSTEM = "tIPPSTEM";
+        final String ACCNUM = "ACCNUM";
         final String tIPTD = "tIPTD";
-        Fields fields = new Fields( txnid, keyfield1, tIPPSTEM);
+        Fields fields = new Fields( txnid, keyfield1, ACCNUM);
         when(tuple.getFields()).thenReturn(fields);
         when(tuple.getValueByField(txnid)).thenReturn(123);
         when(tuple.getValueByField(keyfield1)).thenReturn(null);
         when(tuple.getValueByField("tIPPBR")).thenReturn(556677);
-        when(tuple.getValueByField(tIPPSTEM)).thenReturn(123456789L);
+        when(tuple.getValueByField(ACCNUM)).thenReturn(123456789L);
         when(tuple.getValueByField(tIPTD)).thenReturn("2015-10-01");
         when(tuple.size()).thenReturn(4);
 
 
-        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, tIPPSTEM });
+        RemoveInvalidMessages filter = new RemoveInvalidMessages(txnid, new String[] { keyfield1, ACCNUM });
         assertThat(filter.isKeep(tuple), is(false));
     }
 }
