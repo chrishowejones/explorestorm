@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static org.hamcrest.Matchers.is;
@@ -44,4 +45,11 @@ public class JSONParserTest {
         assertThat(parser.parseString(jsonObject, "datefield"), is("2015-11-01"));
     }
 
+    @Test
+    public void testParseBigDecimal() throws Exception {
+        JSONParser parser = new JSONParser();
+        String bigdecimal = "{\"bigdecimal\":12345.67}";
+        JSONObject jsonObject = new JSONObject(bigdecimal);
+        assertThat(parser.parseBigDecimal(jsonObject, "bigdecimal"), is(new BigDecimal("12345.67").setScale(2)));
+    }
 }

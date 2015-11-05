@@ -40,13 +40,13 @@ public class ParseCBSMessageTest {
             "\"tLONUMBER\":0,\"tLORSUB\":0,\"tLOFORMCD\":0,\"tLOFORMSB\":0,\"tIPTCLCDE\":999,\"tIPTCLASS\":0," +
             "\"tIPCORIND\":0,\"tIPTTST\":123,\"tIPTQUAL\":0,\"tIPTSPACE\":null,\"tIPTID\":0,\"tIPPBR\":2021," +
             "\"tIPPACTP\":0,\"tIPPCDG\":0,\"tIPPSTEM\":987654321,\"ACCNUM\":55611108802234,\"tIPPRMACC\":0,\"tIPDFLUI\":0," +
-            "\"tIPLTAM\":0,\"tIPTAM\":10000000000,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
+            "\"tIPLTAM\":0,\"tIPTAM\":100000000.00,\"tIPOCLASS\":0,\"tIPOCOR\":0,\"tIPOTTST\":0,\"tIPOTXCLC\":0,\"tIPPRGTP\":0," +
             "\"tIPPRTP\":10,\"tIPPABNCD\":0,\"tIPRGPABR\":0,\"tIPPAHOBR\":0,\"tIPPRGOCD\":0,\"tIPSECBR\":0," +
             "\"tIPSECATP\":0,\"tIPSECCDG\":0,\"tIPSECSTM\":0,\"tIPRCVBR\":0,\"tIPRCVAT\":0,\"tIPRCVCD\":0," +
             "\"tIPRCVST\":0,\"tIPTD\":\"2015-11-01\",\"tIPLCHOID\":0,\"tHIASDINT\":0,\"tIPPHOIND\":0,\"tIPPROIN\":0,\"tIPPBRIN\":0," +
             "\"tIPPRGIN\":0,\"tIPIBNIN\":0,\"tIPIRGIN\":0,\"tIPREJIN\":1,\"tIPSUSIN\":0,\"tIPEXCIN\":0,\"tIPUNCIN\":0,\"tIPBUSIND\":0," +
             "\"tIPOBSIND\":0,\"tIPINTXNI\":0,\"tIPORIFM\":0,\"tIPDEFTXN\":0,\"tIPDBCRDI\":0,\"tIPCOMMGI\":0,\"tIPACTXNI\":0,\"tIPNSDII\":0," +
-            "\"tHIDINDP\":0,\"tIPDINDP\":0,\"tHIACBL\":123456789099,\"tHILTD\":null,\"tHIPBRIND\":0,\"tHIPROIND\":0,\"tHIPIIND\":0,\"tHITAXAMT\":0," +
+            "\"tHIDINDP\":0,\"tIPDINDP\":0,\"tHIACBL\":1234567890.99,\"tHILTD\":null,\"tHIPBRIND\":0,\"tHIPROIND\":0,\"tHIPIIND\":0,\"tHITAXAMT\":0," +
             "\"tHIEINT\":0,\"tHIF01\":0,\"tHIDCHG\":0,\"tHIWDIN\":0,\"tHIFWIN\":0,\"tHITDORM\":0,\"tHIIAAIN\":0,\"tHIDELPST\":0,\"tHIXSTACC\":0," +
             "\"tHIEXODIN\":0,\"tHIACNAV\":0,\"tHIPRGFUM\":0,\"tHISTOTRM\":0,\"tHIARTERM\":0,\"tHIHNGIN\":0,\"tHICUSSUI\":0,\"tHIRVDTTO\":null," +
             "\"tHIOVDRSN\":0,\"tHITYPSEC\":0,\"tHINTOTI\":0,\"tHILNDAUT\":0,\"tHIEXTOTI\":0,\"tHIF02\":0,\"tHIACPRDN\":0,\"tHIACSTYP\":0,\"tHIPRODNO\":0," +
@@ -309,7 +309,7 @@ public class ParseCBSMessageTest {
         ArrayList<String> fields = buildFields();
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", fields);
         // check parse account number
-        String testJSON = "{\"tIPTAM\":10}";
+        String testJSON = "{\"tIPTAM\":.10}";
 
         Map<String, Object> fieldMap = parseMessage.parse(testJSON);
         assertThat(fieldMap.containsKey("tIPTAM"), is(true));
@@ -322,7 +322,7 @@ public class ParseCBSMessageTest {
         ArrayList<String> fields = buildFields();
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", fields);
         // check parse account number
-        String testJSON = "{\"tIPTAM\":1}";
+        String testJSON = "{\"tIPTAM\":0.01}";
 
         Map<String, Object> fieldMap = parseMessage.parse(testJSON);
         assertThat(fieldMap.containsKey("tIPTAM"), is(true));

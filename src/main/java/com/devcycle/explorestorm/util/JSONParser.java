@@ -44,8 +44,7 @@ public class JSONParser implements Serializable {
         BigDecimal bigDecimal = null;
         if (isValidKey(json, key)) {
             String numberStringValue = json.getString(key).trim();
-            String bigDecimalString = buildBigDecimalString(numberStringValue);
-            bigDecimal = new BigDecimal(bigDecimalString).setScale(2);
+            bigDecimal = new BigDecimal(numberStringValue).setScale(2);
         }
         return bigDecimal;
     }

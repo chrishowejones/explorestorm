@@ -69,9 +69,9 @@ public class TestJson {
         assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
-        assertThat(line.getLong("tIPTAM"), is(50L));
+        assertThat(line.getDouble("tIPTAM"), is(0.5));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(10000L));
+        assertThat(line.getDouble("tHIACBL"), is(100.00));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
@@ -87,9 +87,9 @@ public class TestJson {
         assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(0L));
         assertThat(line.getLong("tIPTCLCDE"), is(0L));
-        assertThat(line.getLong("tIPTAM"), is(50L));
+        assertThat(line.getDouble("tIPTAM"), is(0.5));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(10000L));
+        assertThat(line.getDouble("tHIACBL"), is(100.00));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
@@ -106,9 +106,9 @@ public class TestJson {
         assertThat(line.getLong("ACCNUM"), is(11L));
         assertThat(line.getLong("tIPTTST"), is(201L));
         assertThat(line.getLong("tIPTCLCDE"), is(65737L));
-        assertThat(line.getLong("tIPTAM"), is(5000L));
+        assertThat(line.getDouble("tIPTAM"), is(50.0));
         assertThat(line.getLong("tIPCURCDE"), is(0L));
-        assertThat(line.getLong("tHIACBL"), is(3000L));
+        assertThat(line.getDouble("tHIACBL"), is(30.00));
         assertThat(line.getLong("tIPCDATE"), is(151013L));
         assertThat(line.getString("tIPTD"), is("2015-10-27"));
         assertThat(line.has("tIPTXNARR"), is(false));
