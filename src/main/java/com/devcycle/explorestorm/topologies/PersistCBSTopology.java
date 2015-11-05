@@ -9,7 +9,7 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.function.CBSMessageFields;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
@@ -58,6 +58,22 @@ public class PersistCBSTopology extends BaseExploreTopology {
     private static final String MESSAGE_CF = "message_data";
     private static final String ROW_KEY_FIELD = "account-txn-date";
     private static final String TABLE_NAME = "account-txns";
+    private static final List<String> FIELDS_TO_PARSE = new ArrayList<String>() {
+        {
+            add(CBSMessageFields.FIELD_SEQNUM);
+            add(CBSMessageFields.FIELD_TIME);
+            add(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
+            add(CBSMessageFields.FIELD_TXN_TYPE);
+            add(CBSMessageFields.FIELD_TXN_CODE);
+            add(CBSMessageFields.FIELD_TXN_AMOUNT);
+            add(CBSMessageFields.FIELD_CURRENCY_CDE);
+            add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
+            add(CBSMessageFields.FIELD_CURRENT_DATE);
+            add(CBSMessageFields.FIELD_TXN_DATE);
+            add(CBSMessageFields.FIELD_TXN_NARRATIVE);
+            add(CBSMessageFields.FIELD_FULL_MESSAGE);
+        }
+    };
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
 
@@ -144,34 +160,22 @@ public class PersistCBSTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
         // Create trident stream to read, parse and transform CBS message ready for persisting
-        final List<String> parsedFields = ParseCBSMessage.getEmittedFields().toList();
+        List<String> parsedFields = new ArrayList<>(FIELDS_TO_PARSE);
         parsedFields.add(0, CBSKafkaScheme.FIELD_JSON_MESSAGE);
         Fields outputFieldsFromParse = new Fields(parsedFields);
 
 
         final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseCBSMessage.getEmittedFields())
+                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
                                 new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))
-                .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
+                .each(new Fields(FIELDS_TO_PARSE), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
-        Fields transformedFields = new Fields(
-                CBSMessageFields.FIELD_SEQNUM,
-                CBSMessageFields.FIELD_TIME,
-                CBSMessageFields.FIELD_ACCOUNT_NUMBER,
-                CBSMessageFields.FIELD_TXN_TYPE,
-                CBSMessageFields.FIELD_TXN_CODE,
-                CBSMessageFields.FIELD_TXN_AMOUNT,
-                CBSMessageFields.FIELD_CURRENCY_CDE,
-                CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
-                CBSMessageFields.FIELD_CURRENT_DATE,
-                CBSMessageFields.FIELD_TXN_DATE,
-                CBSMessageFields.FIELD_TXN_NARRATIVE,
-                CBSMessageFields.FIELD_FULL_MESSAGE,
-                ROW_KEY_FIELD
-        );
+        List<String> transformedFieldsList = new ArrayList<String>(parsedFields);
+        transformedFieldsList.add(ROW_KEY_FIELD);
+        Fields transformedFields = new Fields(transformedFieldsList);
 
         List<String> fieldsToPersist = getFieldsToPersistForAccountTxn();
 

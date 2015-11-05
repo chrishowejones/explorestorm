@@ -1,23 +1,21 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by chrishowe-jones on 03/11/15.
@@ -175,7 +173,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testExecute() throws Exception {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // given JSON string in tuple and a trident collector
         TridentTuple tuple = givenJSONTuple();
         TridentCollector collector = givenCollector();
@@ -189,7 +187,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testParseSeqNumber() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // check parse sequence number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("SEQNUM"), is(true));
@@ -198,8 +196,8 @@ public class ParseAlertCBSMessageTest {
     }
 
     @Test
-    public void testParseT_IPPSTEM() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+    public void testParseT_accountNumber() {
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("ACCNUM"), is(true));
@@ -209,7 +207,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testParseT_IPTTST() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPTTST"), is(true));
@@ -219,7 +217,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testParseT_IPTCLASS() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tIPTCLASS"), is(true));
@@ -229,7 +227,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testParseT_HIACBL() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         // check parse account number
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("tHIACBL"), is(true));
@@ -239,7 +237,7 @@ public class ParseAlertCBSMessageTest {
 
     @Test
     public void testParseNonJSONMessage() {
-        ParseAlertCBSMessage parseMessage = new ParseAlertCBSMessage("cbsMessage");
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", buildFields());
         final TridentTuple tuple = mock(TridentTuple.class);
         // prime pump of tuple
         String badMessage = "Not valid JSON";
@@ -251,12 +249,26 @@ public class ParseAlertCBSMessageTest {
         ArgumentCaptor<Values> values = ArgumentCaptor.forClass(Values.class);
         verify(collector).emit(values.capture());
         assertThat(values, notNullValue());
-        assertThat(values.getValue().size(), is(5));
+        assertThat(values.getValue().size(), is(6));
         assertTrue(isAllNulls(values.getAllValues()));
     }
 
+    private List<String> buildFields() {
+        List<String> fields = new ArrayList<String>() {
+            {
+                add(CBSMessageFields.FIELD_SEQNUM);
+                add(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
+                add(CBSMessageFields.FIELD_TXN_TYPE);
+                add(CBSMessageFields.FIELD_TXN_CLASS);
+                add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
+                add(CBSMessageFields.FIELD_TXN_AMOUNT);
+            }
+        };
+        return fields;
+    }
+
     private boolean isAllNulls(List<Values> allValues) {
-        for (Values values : allValues ) {
+        for (Values values : allValues) {
             for (Object value : values) {
                 if (value != null)
                     return false;
@@ -284,7 +296,7 @@ public class ParseAlertCBSMessageTest {
                 T_IPTCLASS,
                 T_HIACBL,
                 T_IPTAM
-         );
+        );
         return expectedValuesFromMessage;
     }
 

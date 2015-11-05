@@ -1,6 +1,7 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;

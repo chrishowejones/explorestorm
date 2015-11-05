@@ -1,6 +1,7 @@
 package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
