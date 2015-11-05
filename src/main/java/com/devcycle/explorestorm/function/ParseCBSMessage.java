@@ -27,20 +27,7 @@ import java.util.Map;
 public class ParseCBSMessage extends BaseFunction {
 
     private static final Logger LOG = LoggerFactory.getLogger(ParseCBSMessage.class);
-    private static final Fields EMITTED_FIELDS = new Fields(
-            CBSMessageFields.FIELD_SEQNUM,
-            CBSMessageFields.FIELD_TIME,
-            CBSMessageFields.FIELD_ACCOUNT_NUMBER,
-            CBSMessageFields.FIELD_TXN_TYPE,
-            CBSMessageFields.FIELD_TXN_CODE,
-            CBSMessageFields.FIELD_TXN_AMOUNT,
-            CBSMessageFields.FIELD_CURRENCY_CDE,
-            CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE,
-            CBSMessageFields.FIELD_CURRENT_DATE,
-            CBSMessageFields.FIELD_TXN_DATE,
-            CBSMessageFields.FIELD_TXN_NARRATIVE,
-            CBSMessageFields.FIELD_FULL_MESSAGE
-    );
+
     private final JSONParser jsonParser = new JSONParser();
     private List<String> fields;
     private String fieldJsonString;
@@ -65,15 +52,6 @@ public class ParseCBSMessage extends BaseFunction {
     public ParseCBSMessage(String fieldJsonString, List<String> fields) {
         initialise(fieldJsonString);
         this.fields = fields;
-    }
-
-    /**
-     * Get the emitted fields from this function.
-     *
-     * @return fields emitted from this function.
-     */
-    public static Fields getEmittedFields() {
-        return EMITTED_FIELDS;
     }
 
     /**
@@ -104,7 +82,6 @@ public class ParseCBSMessage extends BaseFunction {
         try {
             jsonObject = new JSONObject(jsonMessage);
             fieldsMap = buildFieldsMap(jsonObject);
-//            fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
             LOG.warn("Error in JSON: " + jsonMessage, e);
             fieldsMap = populateNullValues();
@@ -149,19 +126,16 @@ public class ParseCBSMessage extends BaseFunction {
     }
 
     private Map<String, Object> populateNullValues() {
-        HashMap<String, Object> fieldsMap = new LinkedHashMap<>();
-        fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TIME, null);
-        fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TXN_CODE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, null);
-        fieldsMap.put(CBSMessageFields.FIELD_CURRENCY_CDE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_CURRENT_DATE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TXN_DATE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_TXN_NARRATIVE, null);
-        fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, null);
+        return buildNullFieldsMap();
+    }
+
+    private Map<String, Object> buildNullFieldsMap() {
+        Map<String, Object> fieldsMap = new LinkedHashMap<>();
+        if (fields != null) {
+            for (String field : fields) {
+                fieldsMap.put(field, null);
+            }
+        }
         return fieldsMap;
     }
 }

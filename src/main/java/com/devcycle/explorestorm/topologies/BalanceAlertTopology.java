@@ -64,6 +64,17 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     private static final String KAFKA_SERIALIZER_STRING_ENCODER = "kafka.serializer.StringEncoder";
     private static final String ACCOUNT_NUMBER_STRING = "accountNumberStr";
 
+    private static final List<String> FIELDS_TO_PARSE = new ArrayList<String>() {
+        {
+            add(CBSMessageFields.FIELD_SEQNUM);
+            add(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
+            add(CBSMessageFields.FIELD_TXN_TYPE);
+            add(CBSMessageFields.FIELD_TXN_CLASS);
+            add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
+            add(CBSMessageFields.FIELD_TXN_AMOUNT);
+        }
+    };
+
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
 
@@ -161,7 +172,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
                 .each(kafkaSpout.getOutputFields(),
-                        new ParseAlertCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE), ParseAlertCBSMessage.getEmittedFields())
+                        new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
                 .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT,
                                 CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
                         new FilterNull())

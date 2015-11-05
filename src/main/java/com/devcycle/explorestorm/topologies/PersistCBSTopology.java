@@ -160,17 +160,17 @@ public class PersistCBSTopology extends BaseExploreTopology {
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
         // Create trident stream to read, parse and transform CBS message ready for persisting
-        final List<String> parsedFields = ParseCBSMessage.getEmittedFields().toList();
+        List<String> parsedFields = new ArrayList<>(FIELDS_TO_PARSE);
         parsedFields.add(0, CBSKafkaScheme.FIELD_JSON_MESSAGE);
         Fields outputFieldsFromParse = new Fields(parsedFields);
 
 
         final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), ParseCBSMessage.getEmittedFields())
+                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
                                 new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))
-                .each(ParseCBSMessage.getEmittedFields(), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
+                .each(new Fields(FIELDS_TO_PARSE), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
 
         // set up HBase state factory
         List<String> transformedFieldsList = new ArrayList<String>(parsedFields);
