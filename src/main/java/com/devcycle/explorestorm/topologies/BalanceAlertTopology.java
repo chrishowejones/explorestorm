@@ -56,6 +56,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     private static final String ROW_KEY = "rowKey";
     private static final String KAFKA_TOPIC = "CBSTopic";
     private static final String TRIDENT_KAFKA_SPOUT = "BalanceAlertSpout";
+    private static final String ZKROOT = "kafka.zkRoot";
     private static final String TOPOLOGY_NAME = "balanceAlertTopology";
     private static final String TABLE_NAME = "OCISDetails";
     private static final String LOW_BALANCE_ALERT = "lowBalanceAlert";
@@ -256,7 +257,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
     private OpaqueTridentKafkaSpout buildKafkaSpout(Scheme cbsKafkaScheme) {
         LOG.info("Build Kafka Spout");
-        BrokerHosts zk = new ZkHosts(topologyConfig.getProperty(KAFKA_ZOOKEEPER_HOST_PORT.toString()));
+        BrokerHosts zk = new ZkHosts(topologyConfig.getProperty(KAFKA_ZOOKEEPER_HOST_PORT.toString()), topologyConfig.getProperty(ZKROOT));
         TridentKafkaConfig spoutConf = new TridentKafkaConfig(zk, topologyConfig.getProperty(KAFKA_TOPIC), TRIDENT_KAFKA_SPOUT);
         spoutConf.scheme = new SchemeAsMultiScheme(cbsKafkaScheme);
         return new OpaqueTridentKafkaSpout(spoutConf);

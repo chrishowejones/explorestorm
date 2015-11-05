@@ -1,5 +1,6 @@
 package com.devcycle.explorestorm.scheme;
 
+import org.json.JSONObject;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -83,7 +84,7 @@ public class CBSMessageFieldsTest {
     @Test
     public void testGetTypeFullMessageClass() throws Exception {
         CBSMessageFields cbsMessageFields = new CBSMessageFields();
-        assertEquals(String.class, cbsMessageFields.getType(CBSMessageFields.FIELD_FULL_MESSAGE));
+        assertEquals(JSONObject.class, cbsMessageFields.getType(CBSMessageFields.FIELD_FULL_MESSAGE));
     }
 
     @Test

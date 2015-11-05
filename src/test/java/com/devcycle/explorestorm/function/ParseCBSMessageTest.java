@@ -2,6 +2,8 @@ package com.devcycle.explorestorm.function;
 
 import backtype.storm.tuple.Values;
 import com.devcycle.explorestorm.scheme.CBSMessageFields;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import storm.trident.operation.TridentCollector;
@@ -183,8 +185,19 @@ public class ParseCBSMessageTest {
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", fields);
         assertThat(parseMessage, notNullValue());
         assertThat(parseMessage.getFields(), notNullValue());
-        assertThat(parseMessage.getFields(), hasSize(1));
-        assertThat(parseMessage.getFields(), hasItem(CBSMessageFields.FIELD_SEQNUM));
+        assertThat(parseMessage.getFields(), hasSize(12));
+        assertThat(parseMessage.getFields().get(0), is(CBSMessageFields.FIELD_SEQNUM));
+        assertThat(parseMessage.getFields().get(1), is(CBSMessageFields.FIELD_TIME));
+        assertThat(parseMessage.getFields().get(2), is(CBSMessageFields.FIELD_ACCOUNT_NUMBER));
+        assertThat(parseMessage.getFields().get(3), is(CBSMessageFields.FIELD_TXN_TYPE));
+        assertThat(parseMessage.getFields().get(4), is(CBSMessageFields.FIELD_TXN_CODE));
+        assertThat(parseMessage.getFields().get(5), is(CBSMessageFields.FIELD_TXN_AMOUNT));
+        assertThat(parseMessage.getFields().get(6), is(CBSMessageFields.FIELD_CURRENCY_CDE));
+        assertThat(parseMessage.getFields().get(7), is(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE));
+        assertThat(parseMessage.getFields().get(8), is(CBSMessageFields.FIELD_CURRENT_DATE));
+        assertThat(parseMessage.getFields().get(9), is(CBSMessageFields.FIELD_TXN_DATE));
+        assertThat(parseMessage.getFields().get(10), is(CBSMessageFields.FIELD_TXN_NARRATIVE));
+        assertThat(parseMessage.getFields().get(11), is(CBSMessageFields.FIELD_FULL_MESSAGE));
     }
 
     @Test
@@ -407,23 +420,24 @@ public class ParseCBSMessageTest {
     }
 
     @Test
-    public void testParseFullMessage() {
-        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage");
+    public void testParseFullMessage() throws JSONException {
+        ArrayList<String> fields = buildFields();
+        ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", fields);
         // check parse narative
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON);
         assertThat(fieldMap.containsKey("fullMessage"), is(true));
-        assertThat(fieldMap.get("fullMessage"), is((Object) expectedJSON));
+        assertThat(fieldMap.get("fullMessage"), is((Object) new JSONObject(expectedJSON).toString()));
         assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
     }
 
     @Test
-    public void testParseAnotherValidMessage() {
+    public void testParseAnotherValidMessage() throws JSONException {
         ArrayList<String> fields = buildFields();
         ParseCBSMessage parseMessage = new ParseCBSMessage("cbsMessage", fields);
         // check parse narative
         Map<String, Object> fieldMap = parseMessage.parse(expectedJSON2);
         assertThat(fieldMap.containsKey("fullMessage"), is(true));
-        assertThat(fieldMap.get("fullMessage"), is((Object) expectedJSON2));
+        assertThat(fieldMap.get("fullMessage"), is((Object) new JSONObject(expectedJSON2).toString()));
         assertThat(fieldMap.get("fullMessage"), instanceOf(String.class));
     }
 
@@ -450,6 +464,17 @@ public class ParseCBSMessageTest {
         return new ArrayList<String>() {
             {
                 add(CBSMessageFields.FIELD_SEQNUM);
+                add(CBSMessageFields.FIELD_TIME);
+                add(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
+                add(CBSMessageFields.FIELD_TXN_TYPE);
+                add(CBSMessageFields.FIELD_TXN_CODE);
+                add(CBSMessageFields.FIELD_TXN_AMOUNT);
+                add(CBSMessageFields.FIELD_CURRENCY_CDE);
+                add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
+                add(CBSMessageFields.FIELD_CURRENT_DATE);
+                add(CBSMessageFields.FIELD_TXN_DATE);
+                add(CBSMessageFields.FIELD_TXN_NARRATIVE);
+                add(CBSMessageFields.FIELD_FULL_MESSAGE);
             }
         };
     }
@@ -476,7 +501,7 @@ public class ParseCBSMessageTest {
         return mockCollector;
     }
 
-    private List<Object> thenMessageValues() {
+    private List<Object> thenMessageValues() throws JSONException {
         Values expectedValuesFromMessage = new Values(
                 SEQNUM,
                 TIME,
@@ -489,7 +514,7 @@ public class ParseCBSMessageTest {
                 T_IPCDATE,
                 T_IPTD,
                 T_IPTXNARR,
-                expectedJSON
+                new JSONObject(expectedJSON).toString()
         );
         return expectedValuesFromMessage;
     }

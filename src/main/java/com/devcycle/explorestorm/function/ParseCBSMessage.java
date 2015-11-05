@@ -13,7 +13,7 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
-
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,7 +60,7 @@ public class ParseCBSMessage extends BaseFunction {
      * Create a ParseCBSMessage function with the field name of the CBS message and the list of fields to parse
      *
      * @param fieldJsonString field name to use to read the json string
-     * @param fields to parse from the json string
+     * @param fields          to parse from the json string
      */
     public ParseCBSMessage(String fieldJsonString, List<String> fields) {
         initialise(fieldJsonString);
@@ -80,7 +80,7 @@ public class ParseCBSMessage extends BaseFunction {
      * Execute the function to parse the input JSON in the tuple field (with the field name given in the
      * constructor) and emit the parsed fields of interest to the stream.
      *
-     * @param tuple - input tuple consisting of a single field and String value of the JSON.
+     * @param tuple     - input tuple consisting of a single field and String value of the JSON.
      * @param collector - collector used to interact with the stream.
      */
     @Override
@@ -104,18 +104,7 @@ public class ParseCBSMessage extends BaseFunction {
         try {
             jsonObject = new JSONObject(jsonMessage);
             fieldsMap = buildFieldsMap(jsonObject);
-//            fieldsMap.put(CBSMessageFields.FIELD_SEQNUM, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_SEQNUM));
-            fieldsMap.put(CBSMessageFields.FIELD_TIME, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TIME));
-            fieldsMap.put(CBSMessageFields.FIELD_ACCOUNT_NUMBER, jsonParser.parseLong(jsonObject, CBSMessageFields.FIELD_ACCOUNT_NUMBER));
-            fieldsMap.put(CBSMessageFields.FIELD_TXN_TYPE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_TYPE));
-            fieldsMap.put(CBSMessageFields.FIELD_TXN_CODE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_TXN_CODE));
-            fieldsMap.put(CBSMessageFields.FIELD_TXN_AMOUNT, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_TXN_AMOUNT));
-            fieldsMap.put(CBSMessageFields.FIELD_CURRENCY_CDE, jsonParser.parseInt(jsonObject, CBSMessageFields.FIELD_CURRENCY_CDE));
-            fieldsMap.put(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, jsonParser.parseBigDecimal(jsonObject, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE));
-            fieldsMap.put(CBSMessageFields.FIELD_CURRENT_DATE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_CURRENT_DATE));
-            fieldsMap.put(CBSMessageFields.FIELD_TXN_DATE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TXN_DATE));
-            fieldsMap.put(CBSMessageFields.FIELD_TXN_NARRATIVE, jsonParser.parseString(jsonObject, CBSMessageFields.FIELD_TXN_NARRATIVE));
-            fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, jsonMessage);
+//            fieldsMap.put(CBSMessageFields.FIELD_FULL_MESSAGE, jsonMessage);
         } catch (JSONException e) {
             LOG.warn("Error in JSON: " + jsonMessage, e);
             fieldsMap = populateNullValues();
@@ -134,8 +123,17 @@ public class ParseCBSMessage extends BaseFunction {
     }
 
     private Object parseField(JSONObject jsonObject, String key, Class type) throws JSONException {
-
-        return jsonParser.parseLong(jsonObject, key);
+        if (type.equals(Long.class))
+            return jsonParser.parseLong(jsonObject, key);
+        if (type.equals(String.class))
+            return jsonParser.parseString(jsonObject, key);
+        if (type.equals(Integer.class))
+            return jsonParser.parseInt(jsonObject, key);
+        if (type.equals(BigDecimal.class))
+            return jsonParser.parseBigDecimal(jsonObject, key);
+        if (type.equals(JSONObject.class))
+            return jsonObject.toString();
+        return null;
     }
 
     Values parseToTuples(String jsonMessage) {

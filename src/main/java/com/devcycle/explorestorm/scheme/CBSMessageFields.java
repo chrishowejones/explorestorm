@@ -1,10 +1,13 @@
 package com.devcycle.explorestorm.scheme;
 
+import org.json.JSONObject;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CBSMessageFields {
+public class CBSMessageFields implements Serializable {
 
     public static final String FIELD_SEQNUM = "SEQNUM"; // Sequence number
     public static final String FIELD_TIME = "TIME"; // TE Time hh:mm:ss
@@ -35,7 +38,7 @@ public class CBSMessageFields {
             put(FIELD_CURRENT_DATE, String.class);
             put(FIELD_TXN_DATE, String.class);
             put(FIELD_TXN_NARRATIVE, String.class);
-            put(FIELD_FULL_MESSAGE, String.class);
+            put(FIELD_FULL_MESSAGE, JSONObject.class);
             put(FIELD_TXN_CLASS, Integer.class);
             put(FIELD_BRANCH_CODE, Integer.class);
             put(FIELD_PARENT_STEM, Long.class);
