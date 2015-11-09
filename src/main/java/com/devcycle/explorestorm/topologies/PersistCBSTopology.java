@@ -136,7 +136,9 @@ public class PersistCBSTopology extends BaseExploreTopology {
     protected Config buildConfig() {
         final Config config = new Config();
         config.put(HBASE_CONFIG.toString(), buildHBaseConfig());
-
+        String numberOfWorkers = topologyConfig.getProperty("numberOfWorkers");
+        if (numberOfWorkers != null && numberOfWorkers.length() > 0)
+            config.setNumWorkers(Integer.parseInt(numberOfWorkers));
         return config;
     }
 
@@ -165,8 +167,14 @@ public class PersistCBSTopology extends BaseExploreTopology {
         Fields outputFieldsFromParse = new Fields(parsedFields);
 
 
-        final Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
+        String parallelismHint = topologyConfig.getProperty("parallelismHint");
+        Integer hint = null;
+        if (parallelismHint != null && parallelismHint.length() > 0)
+             hint = Integer.parseInt(parallelismHint);
+        Stream stream = topology.newStream(STREAM_NAME, kafkaSpout);
+        if (hint != null)
+            stream = stream.parallelismHint(hint);
+        stream = stream.each(kafkaSpout.getOutputFields(), new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
                                 new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))

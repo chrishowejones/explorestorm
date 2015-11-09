@@ -9,7 +9,9 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.ExploreLogFilter;
-import com.devcycle.explorestorm.function.*;
+import com.devcycle.explorestorm.function.CreateOCISAccountRowKey;
+import com.devcycle.explorestorm.function.ParseCBSMessage;
+import com.devcycle.explorestorm.function.RaiseLowBalanceAlert;
 import com.devcycle.explorestorm.mapper.OCISRowToValueMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.scheme.CBSMessageFields;
@@ -118,6 +120,9 @@ public class BalanceAlertTopology extends BaseExploreTopology {
         props.put(REQUEST_REQUIRED_ACKS, topologyConfig.getProperty(REQUEST_REQUIRED_ACKS));
         props.put(SERIALIZER_CLASS, KAFKA_SERIALIZER_STRING_ENCODER);
         config.put(TridentKafkaState.KAFKA_BROKER_PROPERTIES, props);
+        String numberOfWorkers = topologyConfig.getProperty("numberOfWorkers");
+        if (numberOfWorkers != null && numberOfWorkers.length() > 0)
+            config.setNumWorkers(Integer.parseInt(numberOfWorkers));
         return config;
     }
 
@@ -165,13 +170,18 @@ public class BalanceAlertTopology extends BaseExploreTopology {
 
         OpaqueTridentKafkaSpout kafkaSpout = buildKafkaSpout(cbsKafkaScheme);
 
-        // TODO tidy up this code around column fields and output fields
         final Fields columnFields = new Fields(OCISDetails.THRESHOLD);
         HBaseState.Options options = buildOptions(columnFields);
 
-        Stream stream = topology.newStream(STREAM_NAME, kafkaSpout)
-                .each(kafkaSpout.getOutputFields(),
-                        new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
+        String parallelismHint = topologyConfig.getProperty("parallelismHint");
+        Integer hint = null;
+        if (parallelismHint != null && parallelismHint.length() > 0)
+            hint = Integer.parseInt(parallelismHint);
+        Stream stream = topology.newStream(STREAM_NAME, kafkaSpout);
+        if (hint != null)
+            stream = stream.parallelismHint(hint);
+        stream = stream.each(kafkaSpout.getOutputFields(),
+                new ParseCBSMessage(CBSKafkaScheme.FIELD_JSON_MESSAGE, FIELDS_TO_PARSE), new Fields(FIELDS_TO_PARSE))
                 .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT,
                                 CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
                         new FilterNull())
