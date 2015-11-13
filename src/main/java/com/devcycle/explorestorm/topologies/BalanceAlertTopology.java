@@ -73,6 +73,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
             add(CBSMessageFields.FIELD_TXN_CLASS);
             add(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE);
             add(CBSMessageFields.FIELD_TXN_AMOUNT);
+            add(CBSMessageFields.FIELD_MSG_TIMESTAMP);
         }
     };
 
@@ -185,8 +186,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
                 .each(new Fields(CBSMessageFields.FIELD_SEQNUM, CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT,
                                 CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
                         new FilterNull())
-                .each(new Fields(CBSMessageFields.FIELD_ACCOUNT_NUMBER), new CreateOCISAccountRowKey(), new Fields(ROW_KEY))
-                .each(new Fields(ROW_KEY), new ExploreLogFilter(this.getClass().getName()));
+                .each(new Fields(CBSMessageFields.FIELD_ACCOUNT_NUMBER), new CreateOCISAccountRowKey(), new Fields(ROW_KEY));
 
         StateFactory factory = new HBaseStateFactory(options);
 
@@ -195,15 +195,10 @@ public class BalanceAlertTopology extends BaseExploreTopology {
         List<String> outputFields = buildOutputFields(columnFields);
 
         stream = stream.stateQuery(state, new Fields(ROW_KEY), new HBaseQuery(), columnFields)
-                .each(new Fields(outputFields),
-                        new ExploreLogFilter(this.getClass().getName() + " - from HBase :"))
                 .each(new Fields(OCISDetails.THRESHOLD), new FilterNull())
                 .each(new Fields(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_ACCOUNT_NUMBER, OCISDetails.THRESHOLD, CBSMessageFields.FIELD_TXN_AMOUNT,
-                                CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE),
+                                CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE, CBSMessageFields.FIELD_MSG_TIMESTAMP),
                         new RaiseLowBalanceAlert(), new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT))
-                .each(new Fields(CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_ACCOUNT_NUMBER, OCISDetails.THRESHOLD, CBSMessageFields.FIELD_TXN_AMOUNT,
-                        CBSMessageFields.FIELD_TXN_CLASS, CBSMessageFields.FIELD_TXN_TYPE,
-                        ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new ExploreLogFilter(this.getClass().getName() + " - from raise alert :"))
                 .each(new Fields(ACCOUNT_NUMBER_STRING, LOW_BALANCE_ALERT), new FilterNull());
 
         buildKafkaSink(stream);

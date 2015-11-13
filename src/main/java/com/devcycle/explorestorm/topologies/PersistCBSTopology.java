@@ -9,11 +9,11 @@ import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
-import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
+import com.devcycle.explorestorm.scheme.CBSMessageFields;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.storm.hbase.trident.mapper.TridentHBaseMapper;
@@ -49,6 +49,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
     public static final String STREAM_NAME = "CbsHBaseStream";
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
+    public static final String LOCAL_EXPLORE_TOPOLOGY_PROPERTIES = "local_cbs_topology.properties";
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistCBSTopology.class);
     private static final String KAFKA_TOPIC = "CBSTopic";
@@ -71,6 +72,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
             add(CBSMessageFields.FIELD_CURRENT_DATE);
             add(CBSMessageFields.FIELD_TXN_DATE);
             add(CBSMessageFields.FIELD_TXN_NARRATIVE);
+            add(CBSMessageFields.FIELD_MSG_TIMESTAMP);
             add(CBSMessageFields.FIELD_FULL_MESSAGE);
         }
     };
@@ -105,13 +107,14 @@ public class PersistCBSTopology extends BaseExploreTopology {
     public static void main(String[] args) throws IOException, InterruptedException, InvalidTopologyException, AuthorizationException, AlreadyAliveException {
         String configFileLocation = EXPLORE_TOPOLOGY_PROPERTIES;
         boolean runLocally = true;
-        String hbaseRoot;
         PersistCBSTopology persistCBSTopology;
         if (args.length >= 1 && args[0].trim().equalsIgnoreCase(REMOTE)) {
             runLocally = false;
+        } else {
+            configFileLocation = LOCAL_EXPLORE_TOPOLOGY_PROPERTIES;
         }
         persistCBSTopology
-                    = new PersistCBSTopology(configFileLocation);
+                = new PersistCBSTopology(configFileLocation);
 
         persistCBSTopology.buildAndSubmit(TOPOLOGY_NAME, runLocally);
     }
@@ -144,6 +147,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
     /**
      * Build the topology for a Trident Stream that consumes a CBS message from Kafka and persists it in HBase keyed by account/txn-date
+     *
      * @return
      */
     @Override
@@ -153,6 +157,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
 
     /**
      * Build Trident Topology for a Trident Stream that consumes a CBS message from Kafka and persists it in HBase keyed by account/txn-date
+     *
      * @return
      */
     TridentTopology buildTridentTopology() {
@@ -170,7 +175,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
         String parallelismHint = topologyConfig.getProperty("parallelismHint");
         Integer hint = null;
         if (parallelismHint != null && parallelismHint.length() > 0)
-             hint = Integer.parseInt(parallelismHint);
+            hint = Integer.parseInt(parallelismHint);
         Stream stream = topology.newStream(STREAM_NAME, kafkaSpout);
         if (hint != null)
             stream = stream.parallelismHint(hint);
@@ -219,7 +224,8 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .withConfigKey(HBASE_CONFIG.toString())
                 .withDurability(Durability.SYNC_WAL)
                 .withMapper(tridentHBaseMapper)
-                .withTableName(TABLE_NAME);;
+                .withTableName(TABLE_NAME);
+
         HBaseStateFactory factory = new HBaseStateFactory(options);
         return factory;
     }
@@ -265,6 +271,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
         fieldsToPersist.add(CBSMessageFields.FIELD_CURRENT_DATE);
         fieldsToPersist.add(CBSMessageFields.FIELD_TXN_DATE);
         fieldsToPersist.add(CBSMessageFields.FIELD_TXN_NARRATIVE);
+        fieldsToPersist.add(CBSMessageFields.FIELD_MSG_TIMESTAMP);
         return fieldsToPersist;
     }
 

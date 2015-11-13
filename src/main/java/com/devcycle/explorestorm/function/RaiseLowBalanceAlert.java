@@ -10,7 +10,10 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 /**
@@ -41,7 +44,10 @@ public class RaiseLowBalanceAlert extends BaseFunction {
         final int transactionClass = tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_CLASS);
         final int transactionType = tuple.getIntegerByField(CBSMessageFields.FIELD_TXN_TYPE);
         final boolean isDebit = isDebit(transactionClass, transactionType);
-        Values alert = raiseAlert(isDebit, currentBalance, thresholdString, accountNumberStr, transactionAmount);
+        final long messageTimestampLong = tuple.getLongByField(CBSMessageFields.FIELD_MSG_TIMESTAMP);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        final String messageTimestamp = formatter.format(new Date(messageTimestampLong));
+        Values alert = raiseAlert(isDebit, currentBalance, thresholdString, accountNumberStr, transactionAmount, messageTimestamp);
         collector.emit(alert);
     }
 
@@ -54,13 +60,13 @@ public class RaiseLowBalanceAlert extends BaseFunction {
         return transactionClass == 15 && DEBIT_STANDING_ORDER_TYPES.contains(transactionType);
     }
 
-    private Values raiseAlert(boolean isDebit, BigDecimal currentBalance, String thresholdString, String accountNumberStr, BigDecimal transactionAmount) {
+    private Values raiseAlert(boolean isDebit, BigDecimal currentBalance, String thresholdString, String accountNumberStr, BigDecimal transactionAmount, String messageTimestamp) {
         Values alert = new Values();
         alert.add(accountNumberStr);
         final BigDecimal threshold = new BigDecimal(thresholdString);
         if (isDebit && currentBalance.compareTo(threshold) < 0
                 && amountTippedBalance(transactionAmount, currentBalance, threshold)) {
-            final String alertMessage = accountNumberStr + "|balance is under expected threshold|" + currentBalance;
+            final String alertMessage = accountNumberStr + "|balance is under expected threshold|" + currentBalance + "|" + messageTimestamp;
             alert.add(alertMessage);
         } else {
             alert.add(null);

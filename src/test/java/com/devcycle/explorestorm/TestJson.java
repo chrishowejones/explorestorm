@@ -62,7 +62,7 @@ public class TestJson {
     @Test
     public void testFirstLine() throws JSONException {
         JSONObject line = parseLine(readLine());
-        assertThat(line.length(), is(1240));
+        assertThat(line.length(), is(1241));
         assertThat(line.getInt("SEQNUM"), is(1));
         assertThat(line.getLong("tIPTETIME"), is(153236L));
         assertThat(line.getInt("tIPPBR"), is(556111));
@@ -81,7 +81,7 @@ public class TestJson {
     public void testSecondLine() throws JSONException {
         readLine();
         JSONObject line = parseLine(readLine());
-        assertThat(line.length(), is(1240));
+        assertThat(line.length(), is(1241));
         assertThat(line.getInt("SEQNUM"), is(2));
         assertThat(line.getInt("tIPPBR"), is(556111));
         assertThat(line.getLong("ACCNUM"), is(11L));
@@ -100,7 +100,7 @@ public class TestJson {
         readLine();
         readLine();
         JSONObject line = parseLine(readLine());
-        assertThat(line.length(), is(1241));
+        assertThat(line.length(), is(1242));
         assertThat(line.getInt("SEQNUM"), is(3));
         assertThat(line.getInt("tIPPBR"), is(556111));
         assertThat(line.getLong("ACCNUM"), is(11L));

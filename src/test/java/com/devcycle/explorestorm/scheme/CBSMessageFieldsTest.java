@@ -105,4 +105,10 @@ public class CBSMessageFieldsTest {
         assertEquals(Long.class, cbsMessageFields.getType(CBSMessageFields.FIELD_PARENT_STEM));
     }
 
+    @Test
+    public void testGetTypeMsgTimestamp() throws Exception {
+        CBSMessageFields cbsMessageFields = new CBSMessageFields();
+        assertEquals(Long.class, cbsMessageFields.getType(CBSMessageFields.FIELD_MSG_TIMESTAMP));
+    }
+
 }
