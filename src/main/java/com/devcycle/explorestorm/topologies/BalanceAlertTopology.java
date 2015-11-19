@@ -47,8 +47,8 @@ import static com.devcycle.explorestorm.util.StormRunner.REMOTE;
  */
 public class BalanceAlertTopology extends BaseExploreTopology {
 
-    public static final String STREAM_NAME = "CbsBalanceAlertStream";
-    public static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
+    private static final String STREAM_NAME = "CbsBalanceAlertStream";
+    private static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
     public static final String METADATA_BROKER_LIST = "metadata.broker.list";
     public static final String REQUEST_REQUIRED_ACKS = "request.required.acks";
 
@@ -152,7 +152,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
      *
      * @return scheme
      */
-    Scheme getCBSKafkaScheme() {
+    private Scheme getCBSKafkaScheme() {
         if (cbsKafkaScheme == null)
             cbsKafkaScheme = new CBSKafkaScheme();
         return cbsKafkaScheme;
@@ -163,7 +163,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
      *
      * @return trident topology
      */
-    TridentTopology buildTridentTopology() {
+     TridentTopology buildTridentTopology() {
         TridentTopology topology = new TridentTopology();
 
         // set up kafka spout
@@ -211,7 +211,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
      *
      * @return HBaseConfigBuilder
      */
-    HBaseConfigBuilder getHBaseConfigBuilder() {
+    private HBaseConfigBuilder getHBaseConfigBuilder() {
         if (hbaseConfigBuilder == null)
             this.hbaseConfigBuilder = new HBaseConfigBuilder();
         return hbaseConfigBuilder;
@@ -253,8 +253,7 @@ public class BalanceAlertTopology extends BaseExploreTopology {
     private List<String> buildOutputFields(Fields columnFields) {
         String[] fieldsArray =
                 {ROW_KEY, CBSMessageFields.FIELD_CURRENT_ACCOUNT_BALANCE, CBSMessageFields.FIELD_TXN_AMOUNT, CBSMessageFields.FIELD_TXN_TYPE};
-        List<String> outputFields = buildColumnFields(columnFields, fieldsArray);
-        return outputFields;
+        return buildColumnFields(columnFields, fieldsArray);
     }
 
     private List<String> buildColumnFields(Fields columnFields, String[] fieldsArray) {

@@ -24,15 +24,13 @@ public class ExploreTopology extends BaseExploreTopology {
     private static final String LOG_EXPLORE_BOLT_ID = "logExploreEventBolt";
     private static final int DEFAULT_RUNTIME_IN_SECONDS = 6000;
     private final TopologyBuilder builder;
-    private final String topologyName;
-    private final int runtimeInSeconds;
 
 
     public ExploreTopology(final String configFileLocation, final String topologyName) throws IOException {
         super(configFileLocation);
         builder = new TopologyBuilder();
-        this.topologyName = topologyName;
-        runtimeInSeconds = DEFAULT_RUNTIME_IN_SECONDS;
+        String topologyName1 = topologyName;
+        int runtimeInSeconds = DEFAULT_RUNTIME_IN_SECONDS;
     }
 
     public void configureKafkaSpout(TopologyBuilder builder) {

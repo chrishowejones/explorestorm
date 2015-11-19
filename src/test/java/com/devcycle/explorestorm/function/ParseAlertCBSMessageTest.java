@@ -254,7 +254,7 @@ public class ParseAlertCBSMessageTest {
     }
 
     private List<String> buildFields() {
-        List<String> fields = new ArrayList<String>() {
+        return new ArrayList<String>() {
             {
                 add(CBSMessageFields.FIELD_SEQNUM);
                 add(CBSMessageFields.FIELD_ACCOUNT_NUMBER);
@@ -264,7 +264,6 @@ public class ParseAlertCBSMessageTest {
                 add(CBSMessageFields.FIELD_TXN_AMOUNT);
             }
         };
-        return fields;
     }
 
     private boolean isAllNulls(List<Values> allValues) {
@@ -289,7 +288,7 @@ public class ParseAlertCBSMessageTest {
     }
 
     private List<Object> thenMessageValues() {
-        Values expectedValuesFromMessage = new Values(
+        return new Values(
                 SEQNUM,
                 ACCNUM,
                 T_IPTTST,
@@ -297,7 +296,6 @@ public class ParseAlertCBSMessageTest {
                 T_HIACBL,
                 T_IPTAM
         );
-        return expectedValuesFromMessage;
     }
 
 

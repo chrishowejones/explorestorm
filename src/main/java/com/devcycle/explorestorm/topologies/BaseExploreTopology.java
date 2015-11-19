@@ -19,15 +19,15 @@ import java.util.Properties;
  *
  * Created by chrishowe-jones on 17/09/15.
  */
-public abstract class BaseExploreTopology {
+abstract class BaseExploreTopology {
 
     private static final Logger LOG = Logger.getLogger(BaseExploreTopology.class);
-    public static final String LOCALCLUSTERHOST = "localhost";
-    public static final long LOCALCLUSTERPORT = 2181L;
-    public static final int RUNTIME_IN_SECONDS = 6000;
+    private static final String LOCALCLUSTERHOST = "localhost";
+    private static final long LOCALCLUSTERPORT = 2181L;
+    private static final int RUNTIME_IN_SECONDS = 6000;
 
 
-    protected Properties topologyConfig;
+    Properties topologyConfig;
 
     /**
      * Create base class for topologies.

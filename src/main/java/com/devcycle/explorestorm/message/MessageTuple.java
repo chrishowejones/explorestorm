@@ -16,7 +16,6 @@ import java.util.Map;
 public class MessageTuple {
 
     private boolean empty = true;
-    private Logger LOG = LoggerFactory.getLogger(MessageTuple.class);
     private Fields fields;
     private Values values;
 
@@ -26,6 +25,7 @@ public class MessageTuple {
      * @param fieldValueMap - map of field names to object values that will be encapsulated by this tuple.
      */
     public MessageTuple(Map<String, Object> fieldValueMap) {
+        Logger LOG = LoggerFactory.getLogger(MessageTuple.class);
         LOG.trace("Created MessageTuple from map");
         setIsMapEmpty(fieldValueMap);
         loadKeyValues(fieldValueMap);
@@ -47,6 +47,7 @@ public class MessageTuple {
     private Fields buildFields(Map<String, Object> fieldValueMap) {
         if (fieldValueMap == null || empty)
             return null;
+        //noinspection unchecked
         return new Fields(new ArrayList(fieldValueMap.keySet()));
     }
 

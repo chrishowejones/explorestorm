@@ -497,8 +497,7 @@ public class ParseCBSMessageTest {
     }
 
     private TridentCollector givenCollector() {
-        TridentCollector mockCollector = mock(TridentCollector.class);
-        return mockCollector;
+        return mock(TridentCollector.class);
     }
 
     private List<Object> thenMessageValues() throws JSONException {

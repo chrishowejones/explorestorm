@@ -24,7 +24,7 @@ public class CBSMessageFields implements Serializable {
     public static final String FIELD_FULL_MESSAGE = "fullMessage"; // full message
     public static final String FIELD_TXN_CLASS = "tIPTCLASS"; // transaction class
     public static final String FIELD_ACCOUNT_NUMBER = "ACCNUM"; // account number including sort code etc.
-    public static final String FIELD_MSG_TIMESTAMP = "TIMESTAMP_MSG"; // timestamp message created (ms)
+    public static final String FIELD_MSG_TIMESTAMP = "MSG_TIMESTAMP"; // timestamp message created (ms)
 
     private static Map<String, Class> types = new HashMap<String, Class>() {
         {

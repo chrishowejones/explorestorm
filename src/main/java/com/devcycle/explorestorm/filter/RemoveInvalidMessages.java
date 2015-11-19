@@ -49,8 +49,7 @@ public class RemoveInvalidMessages implements Filter {
     }
 
     private boolean isValid(TridentTuple tuple) {
-        boolean valid = hasFieldsAndValues(tuple) && hasTransactionId(tuple) && hasKeyFields(tuple);
-        return valid;
+        return hasFieldsAndValues(tuple) && hasTransactionId(tuple) && hasKeyFields(tuple);
     }
 
     private boolean hasTransactionId(TridentTuple tuple) {
