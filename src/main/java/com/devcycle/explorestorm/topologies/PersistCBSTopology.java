@@ -55,8 +55,8 @@ public class PersistCBSTopology extends BaseExploreTopology {
     private static final String KAFKA_TOPIC = "CBSTopic";
     private static final String TRIDENT_KAFKA_SPOUT = "CBSMessageSpout";
     private static final String TOPOLOGY_NAME = "persistCBSTopology";
-    private static final String STATEMENT_DATA_CF = "statement_data";
-    private static final String MESSAGE_CF = "message_data";
+    private static final String STATEMENT_DATA_CF = "s";
+    private static final String MESSAGE_CF = "m";
     private static final String ROW_KEY_FIELD = "account-txn-date";
     private static final String TABLE_NAME = "account-txns";
     private static final List<String> FIELDS_TO_PARSE = new ArrayList<String>() {
@@ -226,8 +226,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .withMapper(tridentHBaseMapper)
                 .withTableName(TABLE_NAME);
 
-        HBaseStateFactory factory = new HBaseStateFactory(options);
-        return factory;
+        return new HBaseStateFactory(options);
     }
 
     /**

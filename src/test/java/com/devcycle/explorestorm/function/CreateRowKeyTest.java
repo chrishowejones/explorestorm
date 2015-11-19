@@ -29,6 +29,7 @@ public class CreateRowKeyTest {
         transform.execute(tuple, collector);
 
         // assert collector in correct state
+        //noinspection unchecked
         verify(collector).emit(any(List.class));
         String expectedKey = "1234567890-2015-10-27";
         Values expectedValues = new Values(expectedKey);

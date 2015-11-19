@@ -63,7 +63,7 @@ public class BalanceAlertTopologyTest {
         topology.setHBaseConfigBuilder(mockHBaseConfigBuilder);
 
         Config config = topology.buildConfig();
-        HashMap<String, Object> hbaseConfig = (HashMap<String, Object>) config.get(HBASE_CONFIG.toString());
+        @SuppressWarnings("unchecked") HashMap<String, Object> hbaseConfig = (HashMap<String, Object>) config.get(HBASE_CONFIG.toString());
         assertThat(hbaseConfig.get(HBaseConfigBuilder.ZOOKEEPER_ZNODE_PARENT), is((Object) znodeParent));
     }
 

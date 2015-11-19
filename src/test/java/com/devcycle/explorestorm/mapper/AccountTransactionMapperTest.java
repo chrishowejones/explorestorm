@@ -349,7 +349,7 @@ public class AccountTransactionMapperTest {
         assertThat(new String(column2_1.getValue()), is(fullMessageValue));
     }
 
-    public static long toLong(byte[] b) {
+    private static long toLong(byte[] b) {
         ByteBuffer bb = ByteBuffer.allocate(b.length);
         bb.put(b, 0, b.length);
         bb.flip();//need flip
