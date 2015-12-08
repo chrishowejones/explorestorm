@@ -25,6 +25,8 @@ public class CBSMessageFields implements Serializable {
     public static final String FIELD_TXN_CLASS = "tIPTCLASS"; // transaction class
     public static final String FIELD_ACCOUNT_NUMBER = "ACCNUM"; // account number including sort code etc.
     public static final String FIELD_MSG_TIMESTAMP = "MSG_TIMESTAMP"; // timestamp message created (ms)
+    public static final String FIELD_MSG_TIMESTAMP_STORM = "MSG_TIMESTAMP_STORM"; // timestamp at start of Storm topology
+    public static final String FIELD_MSG_TIMESTAMP_STORMHBASE = "MSG_TIMESTAMP_HBASE"; // timestamp message created read into Storm
 
     private static Map<String, Class> types = new HashMap<String, Class>() {
         {
@@ -44,6 +46,8 @@ public class CBSMessageFields implements Serializable {
             put(FIELD_BRANCH_CODE, Integer.class);
             put(FIELD_PARENT_STEM, Long.class);
             put(FIELD_MSG_TIMESTAMP, Long.class);
+            put(FIELD_MSG_TIMESTAMP_STORM, Long.class);
+            put(FIELD_MSG_TIMESTAMP_STORMHBASE, Long.class);
         }
     };
 
