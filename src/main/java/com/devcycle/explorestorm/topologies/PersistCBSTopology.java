@@ -8,9 +8,11 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.spout.Scheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.tuple.Fields;
+import com.devcycle.explorestorm.filter.ExploreLogFilter;
 import com.devcycle.explorestorm.filter.RemoveInvalidMessages;
 import com.devcycle.explorestorm.function.AddTimestampFunction;
 import com.devcycle.explorestorm.function.CreateAccountTxnRowKey;
+import com.devcycle.explorestorm.function.ExploreLogFunction;
 import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.mapper.AccountTransactionMapper;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
@@ -77,6 +79,7 @@ public class PersistCBSTopology extends BaseExploreTopology {
             add(CBSMessageFields.FIELD_FULL_MESSAGE);
         }
     };
+
     private HBaseConfigBuilder hbaseConfigBuilder;
     private Scheme cbsKafkaScheme;
 
@@ -173,6 +176,11 @@ public class PersistCBSTopology extends BaseExploreTopology {
         parsedFields.add(1, CBSMessageFields.FIELD_MSG_TIMESTAMP_STORM);
         Fields outputFieldsFromParse = new Fields(parsedFields);
 
+        List<String> transformedFieldsList = new ArrayList<String>(parsedFields);
+        transformedFieldsList.add(ROW_KEY_FIELD);
+        Fields transformedFields = new Fields(transformedFieldsList);
+
+
         String parallelismHint = topologyConfig.getProperty("parallelismHint");
         Integer hint = null;
         if (parallelismHint != null && parallelismHint.length() > 0)
@@ -185,18 +193,20 @@ public class PersistCBSTopology extends BaseExploreTopology {
                 .each(outputFieldsFromParse,
                         new RemoveInvalidMessages(CBSMessageFields.FIELD_SEQNUM,
                                 new String[]{CBSMessageFields.FIELD_ACCOUNT_NUMBER, CBSMessageFields.FIELD_TXN_DATE}))
-                .each(new Fields(FIELDS_TO_PARSE), new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD));
+                .each(outputFieldsFromParse, new CreateAccountTxnRowKey(), new Fields(ROW_KEY_FIELD))
+                .each(transformedFields, new ExploreLogFilter(this.getClass().getName()));
 
         // set up HBase state factory
-        List<String> transformedFieldsList = new ArrayList<String>(parsedFields);
-        transformedFieldsList.add(ROW_KEY_FIELD);
-        Fields transformedFields = new Fields(transformedFieldsList);
 
         List<String> fieldsToPersist = getFieldsToPersistForAccountTxn();
-
+        List<String> fieldsToPersist2 = new ArrayList<>();
+        fieldsToPersist2.addAll(fieldsToPersist);
 
         HBaseStateFactory factory = buildCBSHBaseStateFactory(fieldsToPersist);
-        stream.each(transformedFields, new AddTimestampFunction(), new Fields(CBSMessageFields.FIELD_MSG_TIMESTAMP_STORMHBASE));
+        fieldsToPersist2.add(ROW_KEY_FIELD);
+        stream = stream.each(transformedFields, new AddTimestampFunction(), new Fields(CBSMessageFields.FIELD_MSG_TIMESTAMP_STORMHBASE))
+            .each(new Fields(fieldsToPersist2), new ExploreLogFilter(this.getClass().getName()));
+
         stream.partitionPersist(factory, new Fields(fieldsToPersist), new HBaseUpdater());
         return topology;
     }
@@ -273,9 +283,6 @@ public class PersistCBSTopology extends BaseExploreTopology {
         fieldsToPersist.add(CBSMessageFields.FIELD_CURRENT_DATE);
         fieldsToPersist.add(CBSMessageFields.FIELD_TXN_DATE);
         fieldsToPersist.add(CBSMessageFields.FIELD_TXN_NARRATIVE);
-        fieldsToPersist.add(CBSMessageFields.FIELD_MSG_TIMESTAMP);
-        fieldsToPersist.add(CBSMessageFields.FIELD_MSG_TIMESTAMP_STORM);
-        fieldsToPersist.add(CBSMessageFields.FIELD_MSG_TIMESTAMP_STORMHBASE);
         return fieldsToPersist;
     }
 

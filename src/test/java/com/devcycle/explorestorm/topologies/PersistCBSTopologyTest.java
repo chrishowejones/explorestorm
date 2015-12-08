@@ -7,6 +7,7 @@ import com.devcycle.explorestorm.function.ParseCBSMessage;
 import com.devcycle.explorestorm.scheme.CBSKafkaScheme;
 import com.devcycle.explorestorm.util.HBaseConfigBuilder;
 import org.apache.storm.hbase.trident.state.HBaseStateFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
