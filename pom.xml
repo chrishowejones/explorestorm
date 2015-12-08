@@ -6,7 +6,7 @@
 
     <groupId>com.devcycle</groupId>
     <artifactId>explorestorm</artifactId>
-    <version>test-timestamp</version>
+    <version>0.0.8-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
