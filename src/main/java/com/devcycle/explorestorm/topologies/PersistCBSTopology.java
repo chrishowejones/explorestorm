@@ -47,14 +47,14 @@ import static com.devcycle.explorestorm.util.StormRunner.REMOTE;
 public class PersistCBSTopology extends BaseExploreTopology {
 
 
-    public static final String STREAM_NAME = "CbsHBaseStream";
+    public static final String STREAM_NAME = "TestHBaseStream";
     public static final String EXPLORE_TOPOLOGY_PROPERTIES = "cbs_topology.properties";
     public static final String LOCAL_EXPLORE_TOPOLOGY_PROPERTIES = "local_cbs_topology.properties";
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistCBSTopology.class);
     private static final String KAFKA_TOPIC = "CBSTopic";
-    private static final String TRIDENT_KAFKA_SPOUT = "CBSMessageSpout";
-    private static final String TOPOLOGY_NAME = "persistCBSTopology";
+    private static final String TRIDENT_KAFKA_SPOUT = "TestMessageSpout";
+    private static final String TOPOLOGY_NAME = "testTimestamp";
     private static final String STATEMENT_DATA_CF = "s";
     private static final String MESSAGE_CF = "m";
     private static final String ROW_KEY_FIELD = "account-txn-date";
